@@ -7,6 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "jewelschememobileapp",
     "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "assets/images/*",
+      "assets/fonts/*"
+    ],
+    "splash": {
+      "backgroundColor": "#ffffff"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
@@ -16,7 +23,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "backgroundColor": "#ffffff",
+      "edgeToEdgeEnabled": true,
+      "package": "com.madhubabu8.jewelSchememobileApp"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +46,21 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "API_URL": "https://jewelerp.timeserasoftware.in",
+      "JEWEL_SERVICE_URL": "https://jewelerp.timeserasoftware.in",
+      "eas": {
+        "projectId": "2874f4ee-c554-411d-a489-589b9fc25e8b"
+      }
+    },
+    "owner": "madhubabu8",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/df75f1b8-46c0-4b75-b0e5-58e59c4ea7dc"
     }
   }
 }
