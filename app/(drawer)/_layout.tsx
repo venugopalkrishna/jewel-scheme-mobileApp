@@ -1,4 +1,5 @@
 import Header from "@/components/Homepages/Header";
+import { useAuth } from "@/context/AuthContext";
 import {
   AntDesign,
   FontAwesome5,
@@ -15,6 +16,7 @@ import { Drawer } from "expo-router/drawer";
 import { StyleSheet } from "react-native";
 
 export default function Layout() {
+  const { login, isLogged } = useAuth();
   return (
     <Drawer
       screenOptions={{
@@ -52,6 +54,19 @@ export default function Layout() {
           title: "Home",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="login"
+        options={{
+          title: isLogged == false ? "Login/Signup" : "Logout",
+          drawerIcon: ({ color, size }) => (
+            <AntDesign
+              name={isLogged == false ? "login" : "logout"}
+              size={18}
+              color={color}
+            />
           ),
         }}
       />

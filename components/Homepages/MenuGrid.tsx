@@ -78,20 +78,19 @@ export default function MenuGrid() {
           <TouchableOpacity
             style={styles.item}
             onPress={() => {
-              // if (isLogged) {
-              // ✅ already logged in → navigate to route
-              // if (item?.route) {
-              // router.replace(`/(public)/${item?.route}` as any);
-              router.push(`/explore/${item?.route}` as any);
-              console.log(item?.route, "route");
+              if (isLogged) {
+                // ✅ already logged in → navigate to route
+                // if (item?.route) {
+                // router.replace(`/(public)/${item?.route}` as any);
+                router.push(`/explore/${item?.route}` as any);
 
-              //   } else {
-              //     console.warn(`No route defined for ${item.title}`);
-              //   }
-              // } else {
-              //   // ❌ not logged in → send to login page
-              //   // router.replace("/login");
-              // }
+                //   } else {
+                //     console.warn(`No route defined for ${item.title}`);
+                //   }
+              } else {
+                // ❌ not logged in → send to login page
+                router.replace("/(drawer)/login");
+              }
             }}
           >
             <Text style={styles.icon}>{renderIcon(item)}</Text>

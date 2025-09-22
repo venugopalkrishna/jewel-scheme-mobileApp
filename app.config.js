@@ -11,7 +11,7 @@ export default ({ config }) => ({
     API_URL: process.env.JEWEL_SERVICE_URL,
     JEWEL_SERVICE_URL: process.env.JEWEL_SERVICE_URL,
     eas: {
-      projectId: "2874f4ee-c554-411d-a489-589b9fc25e8b",
+      projectId: "5d7c47ab-4d27-4ff4-b31f-3fd61d46eec3",
     },
   },
 });
