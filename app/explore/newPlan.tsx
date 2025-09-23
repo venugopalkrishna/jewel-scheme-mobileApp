@@ -1,5 +1,6 @@
 import { CREATE_JEWEL } from "@/api";
 import GradientText from "@/utilities/LinearGradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -10,20 +11,27 @@ const NewPlans = () => {
   const router = useRouter();
   const [schemeName, setSchemeName] = useState([]);
   const [schemeTypeData, setSchemeData] = useState([]);
-  const tenantName = localStorage.getItem("tenantName");
 
   useEffect(() => {
-    axios
-      .get(
-        `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithOrder?tableName=SCHEME_TYPE&order=SNO`,
-        { headers: { tenantName: tenantName } }
-      )
-      .then((res) => {
-        setSchemeData(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const fetchTenantAndData = async () => {
+      try {
+        // ✅ Get tenantName from AsyncStorage
+        const storedTenant = await AsyncStorage.getItem("tenantName");
+
+        // ✅ Only make API call if tenantName exists
+        if (storedTenant) {
+          const res = await axios.get(
+            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithOrder?tableName=SCHEME_TYPE&order=SNO`,
+            { headers: { tenantName: storedTenant } }
+          );
+          setSchemeData(res.data);
+        }
+      } catch (err) {
+        console.log("Error fetching data:", err);
+      }
+    };
+
+    fetchTenantAndData();
   }, []);
 
   return (

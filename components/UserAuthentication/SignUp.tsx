@@ -1,9 +1,10 @@
 import { CREATE_JEWEL } from "@/api";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -41,13 +42,23 @@ const SignUp = () => {
     { label: "Hindi", value: "hi" },
     { label: "❌ Clear Selection", value: null }, // 👈 extra option
   ];
-  // useEffect(() => {
-  //   if (localStorage.getItem("tenantName")) {
-  //     setIsLoggedIn(true);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, [localStorage.getItem("tenantName")]);
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const tenantName = await AsyncStorage.getItem("tenantName");
+        if (tenantName) {
+          setIsLoggedIn(true);
+          router.push("/(drawer)");
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        console.log("Error reading storage:", error);
+      }
+    };
+
+    checkLogin();
+  }, []);
 
   const signUp = async () => {
     try {

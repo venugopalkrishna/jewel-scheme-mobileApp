@@ -1,4 +1,5 @@
 import { CREATE_JEWEL } from "@/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -17,13 +18,13 @@ const JoinPurchasePlan = () => {
   console.log(cardNo, "cardNo");
   console.log(params, "params");
   console.log(profileData, "profileData");
-  const tenantName = localStorage.getItem("tenantName");
 
   const addCardNo = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=SCHEME_MEMBER&column=CNO`,
-        { headers: { tenantName: tenantName } }
+        { headers: { tenantName: storedTenant } }
       );
       const data: number = response?.data[0]?.Column1 || 0;
       setCardNo(data);
@@ -35,10 +36,11 @@ const JoinPurchasePlan = () => {
   };
 
   const addRecieptNo = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
-        { headers: { tenantName: tenantName } }
+        { headers: { tenantName: storedTenant } }
       );
       const data: number = response?.data[0]?.Column1 || 0;
       setReceiptNo(data);
@@ -49,12 +51,13 @@ const JoinPurchasePlan = () => {
     }
   };
   const getProfile = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_MEMBER_PROFILE&where=MOBILENO%3D%27999%27`,
         {
           headers: {
-            tenantName: tenantName,
+            tenantName: storedTenant,
           },
         }
       );
@@ -115,15 +118,14 @@ const JoinPurchasePlan = () => {
       modetype: "string",
       accname: "string",
     };
-    console.log(payload, "payload");
-
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.post(
         `${CREATE_JEWEL}/api/Master/ReceiptMastInsert`,
         payload,
         {
           headers: {
-            tenantName: tenantName,
+            tenantName: storedTenant,
           },
         }
       );
@@ -154,13 +156,14 @@ const JoinPurchasePlan = () => {
       },
     ];
     // ));
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.post(
         `${CREATE_JEWEL}/api/Master/ReceiptPaymentInsert`,
         tablePayloads,
         {
           headers: {
-            tenantName: tenantName,
+            tenantName: storedTenant,
           },
         }
       );
@@ -191,13 +194,14 @@ const JoinPurchasePlan = () => {
       schemeenddate: params?.SchemeEndDate || new Date().toISOString(),
       bonusMonth: 0,
     };
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.post(
         `${CREATE_JEWEL}/api/Scheme/MemberCardDetailsInsert`,
         memberCardPayload,
         {
           headers: {
-            tenantName: tenantName,
+            tenantName: storedTenant,
           },
         }
       );

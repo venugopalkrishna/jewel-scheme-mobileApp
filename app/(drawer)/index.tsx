@@ -11,18 +11,31 @@ import AdvertisementCarousel from "@/components/Homepages/AdvertisementCarousel"
 import Header from "@/components/Homepages/Header";
 import RateCard from "@/components/Homepages/RateCard";
 import { useAuth } from "@/context/AuthContext";
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useEffect } from "react";
 import { SafeAreaView, ScrollView } from "react-native";
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { login, setIsLoggedIn } = useAuth();
-  // useEffect(() => {
-  //   if (localStorage.getItem("tenantName")) {
-  //     setIsLoggedIn(true);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, [localStorage.getItem("tenantName")]);
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const tenantName = await AsyncStorage.getItem("tenantName");
+        if (tenantName) {
+          setIsLoggedIn(true);
+          router.push("/(drawer)");
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        console.log("Error reading storage:", error);
+      }
+    };
+
+    checkLogin();
+  }, []);
   return (
     <ImageBackground
       source={require("../../assets/images/splash-icon.png")} // local image

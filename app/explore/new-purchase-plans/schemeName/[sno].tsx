@@ -1,4 +1,5 @@
 import { CREATE_JEWEL } from "@/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -9,25 +10,46 @@ const SchemeName = () => {
   const [schemeName, setSchemeName] = useState<any>([]);
   const router = useRouter();
   const params = useLocalSearchParams();
-  const tenantName = localStorage.getItem("tenantName");
-
-  console.log(params, "params");
 
   useEffect(() => {
-    axios
-      .get(
-        `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_NAME&where=SCHEMETYPE='${
-          params?.SchemeType ? params?.SchemeType : ""
-        }'&order=SCHEME_SERIALNO`,
-        { headers: { tenantName: tenantName } }
-      )
-      .then((res) => {
-        setSchemeName(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const fetchTenantAndData = async () => {
+      try {
+        // ✅ Get tenantName from AsyncStorage
+        const storedTenant = await AsyncStorage.getItem("tenantName");
+
+        // ✅ Only make API call if tenantName exists
+        if (storedTenant) {
+          const res = await axios.get(
+            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_NAME&where=SCHEMETYPE='${
+              params?.SchemeType ? params?.SchemeType : ""
+            }'&order=SCHEME_SERIALNO`,
+            { headers: { tenantName: storedTenant } }
+          );
+          setSchemeName(res.data);
+        }
+      } catch (err) {
+        console.log("Error fetching data:", err);
+      }
+    };
+
+    fetchTenantAndData();
   }, []);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(
+  //       `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_NAME&where=SCHEMETYPE='${
+  //         params?.SchemeType ? params?.SchemeType : ""
+  //       }'&order=SCHEME_SERIALNO`,
+  //       { headers: { tenantName: tenantName } }
+  //     )
+  //     .then((res) => {
+  //       setSchemeName(res.data);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // }, []);
   return (
     <ScrollView>
       <Text

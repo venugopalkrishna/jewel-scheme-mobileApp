@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
@@ -6,28 +7,28 @@ import { Button, StyleSheet, Text, View } from "react-native";
 const Logout = () => {
   const router = useRouter();
   const { logout, setIsLoggedIn } = useAuth();
-  // useEffect(() => {
-  //   if (localStorage.getItem("tenantName")) {
-  //     setIsLoggedIn(true);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, [localStorage.getItem("tenantName")]);
-  const logOut = () => {
-    logout();
-    router.replace("/");
-    localStorage.removeItem("tenantName");
-    localStorage.clear();
-    window.location.reload();
+
+  const logOut = async () => {
+    try {
+      await AsyncStorage.removeItem("tenantName");
+      logout();
+      setIsLoggedIn(false);
+      router.replace("/");
+    } catch (error) {
+      console.log("Error during logout:", error);
+    }
   };
+
   const goToHome = () => {
-    router.push("/"); // Navigate to home without logout
+    router.push("/");
   };
+
   return (
     <View style={styles.container}>
       <View>
         <Text>Are you sure you want to logout?</Text>
       </View>
+
       <View style={styles.buttonContainer}>
         <Button title="Confirm Logout" onPress={logOut} />
       </View>
@@ -46,10 +47,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 20,
-  },
-  textContainer: {
-    marginBottom: 20,
-    alignItems: "center",
   },
   buttonContainer: {
     marginVertical: 10,

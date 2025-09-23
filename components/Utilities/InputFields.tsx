@@ -33,7 +33,6 @@ export const InputWithIcon = ({
 export const MobileInput = (props: TextInputProps) => {
   return (
     <InputWithIcon
-      keyboardType="phone-pad"
       // maxLength={10}
       autoCorrect={false}
       autoCapitalize="none"

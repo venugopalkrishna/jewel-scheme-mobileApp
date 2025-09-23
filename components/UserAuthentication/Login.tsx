@@ -5,9 +5,10 @@
 // } from "@/components/InputFields";
 import { CREATE_JEWEL } from "@/api";
 import { useAuth } from "@/context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Avatar, Checkbox } from "react-native-paper";
 import { MobileInput, PasswordInput } from "../Utilities/InputFields";
@@ -21,13 +22,23 @@ export default function Login() {
     password: "",
   });
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("tenantName")) {
-  //     setIsLoggedIn(true);
-  //   } else {
-  //     setIsLoggedIn(false);
-  //   }
-  // }, [localStorage.getItem("tenantName")]);
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const tenantName = await AsyncStorage.getItem("tenantName");
+        if (tenantName) {
+          setIsLoggedIn(true);
+          router.push("/(drawer)");
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        console.log("Error reading storage:", error);
+      }
+    };
+
+    checkLogin();
+  }, []);
 
   const loginAPI = async () => {
     try {
@@ -37,8 +48,9 @@ export default function Login() {
       console.log(response?.data, "data");
 
       if (response?.data) {
-        // Store login status
-        localStorage.setItem("tenantName", response?.data);
+        // ✅ Store login status in AsyncStorage
+        await AsyncStorage.setItem("tenantName", response?.data);
+
         login();
         router.push("/(drawer)");
       } else {
@@ -112,12 +124,7 @@ export default function Login() {
         </View>
 
         <View style={styles.loginButton}>
-          <TouchableOpacity
-            style={styles.customButton}
-            onPress={() => {
-              loginAPI();
-            }}
-          >
+          <TouchableOpacity style={styles.customButton} onPress={loginAPI}>
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
         </View>
