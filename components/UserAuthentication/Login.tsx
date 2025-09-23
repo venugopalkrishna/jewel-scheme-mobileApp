@@ -3,27 +3,57 @@
 //   MobileInput,
 //   PasswordInput,
 // } from "@/components/InputFields";
+import { CREATE_JEWEL } from "@/api";
 import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Avatar, Checkbox } from "react-native-paper";
-import {
-  LogiWithOTP,
-  MobileInput,
-  PasswordInput,
-} from "../Utilities/InputFields";
+import { MobileInput, PasswordInput } from "../Utilities/InputFields";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, setIsLoggedIn } = useAuth();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
+  const [form, setForm] = useState({
+    userName: "",
+    password: "",
+  });
+
+  // useEffect(() => {
+  //   if (localStorage.getItem("tenantName")) {
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, [localStorage.getItem("tenantName")]);
+
+  const loginAPI = async () => {
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Tenant/CheckValidSchemeUser?userName=${form?.userName}&password=${form?.password}`
+      );
+      console.log(response?.data, "data");
+
+      if (response?.data) {
+        // Store login status
+        localStorage.setItem("tenantName", response?.data);
+        login();
+        router.push("/(drawer)");
+      } else {
+        console.log("Invalid username or password");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       {/* <MenuHeader /> */}
       {/* Back button at top-left */}
-      {/* <View style={styles.backButtonWrapper}>
+      <View style={styles.backButtonWrapper}>
         <TouchableOpacity
           style={styles.backbuttonInsidewrapper}
           onPress={() => {
@@ -32,11 +62,11 @@ export default function Login() {
         >
           <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
 
       {/* Centered input fields + login button */}
       <View style={styles.inputFields}>
-        <View style={styles.otpContainer}>
+        {/* <View style={styles.otpContainer}>
           <LogiWithOTP />
           <TouchableOpacity
             style={{
@@ -48,9 +78,15 @@ export default function Login() {
             <Text style={{ textAlign: "center", color: "#fff" }}>SendOTP</Text>
           </TouchableOpacity>
         </View>
-        <Text style={{ textAlign: "center" }}>Or</Text>
-        <MobileInput />
-        <PasswordInput />
+        <Text style={{ textAlign: "center" }}>Or</Text> */}
+        <MobileInput
+          value={form.userName}
+          onChangeText={(text) => setForm({ ...form, userName: text })}
+        />
+        <PasswordInput
+          value={form.password}
+          onChangeText={(text) => setForm({ ...form, password: text })}
+        />
         <View style={styles.row}>
           <TouchableOpacity
             style={styles.row}
@@ -65,22 +101,21 @@ export default function Login() {
             ></Checkbox>
             <Text style={styles.label}>Remember me</Text>
           </TouchableOpacity>
-          <Text
+          {/* <Text
             style={styles.forgot}
             onPress={() => {
               router.push("/forgot");
             }}
           >
             Forgot Password?
-          </Text>
+          </Text> */}
         </View>
 
         <View style={styles.loginButton}>
           <TouchableOpacity
             style={styles.customButton}
             onPress={() => {
-              login();
-              router.push("/(drawer)");
+              loginAPI();
             }}
           >
             <Text style={styles.buttonText}>Login</Text>

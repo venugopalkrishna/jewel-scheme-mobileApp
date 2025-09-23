@@ -10,12 +10,13 @@ const NewPlans = () => {
   const router = useRouter();
   const [schemeName, setSchemeName] = useState([]);
   const [schemeTypeData, setSchemeData] = useState([]);
+  const tenantName = localStorage.getItem("tenantName");
 
   useEffect(() => {
     axios
       .get(
         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithOrder?tableName=SCHEME_TYPE&order=SNO`,
-        { headers: { tenantName: "9xtigYG3LOE79Wvow3ymTg==" } }
+        { headers: { tenantName: tenantName } }
       )
       .then((res) => {
         setSchemeData(res.data);

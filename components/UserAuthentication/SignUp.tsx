@@ -1,4 +1,7 @@
+import { CREATE_JEWEL } from "@/api";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,6 +16,7 @@ import { Checkbox } from "react-native-paper";
 
 const SignUp = () => {
   const router = useRouter();
+  const { login, setIsLoggedIn } = useAuth();
   // const [firstName, setFirstName] = useState("");
   // const [lastName, setLastName] = useState("");
   // const [email, setEmail] = useState("");
@@ -37,6 +41,53 @@ const SignUp = () => {
     { label: "Hindi", value: "hi" },
     { label: "❌ Clear Selection", value: null }, // 👈 extra option
   ];
+  // useEffect(() => {
+  //   if (localStorage.getItem("tenantName")) {
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, [localStorage.getItem("tenantName")]);
+
+  const signUp = async () => {
+    try {
+      const payload = {
+        loginuser: form?.lastName,
+        pwd: form?.password,
+        mobileno: form?.phone,
+        firmname: "BALA GANESH JEWELLERY",
+        dbName: "APP_ORIGIN_JST",
+        clientName: "BALA GANESH",
+      };
+
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/Tenant/SchemeUserRegistration`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "*/*",
+          },
+        }
+      );
+
+      console.log(response?.data);
+
+      if (response?.data) {
+        setForm({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+        });
+        router.push("/(drawer)/login");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
@@ -46,6 +97,16 @@ const SignUp = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.backButtonWrapper}>
+        <TouchableOpacity
+          style={styles.backbuttonInsidewrapper}
+          onPress={() => {
+            router.push("/(drawer)/login");
+          }}
+        >
+          <Text style={styles.backButton}>Back</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={styles.creatAccount}> CREATE A NEW ACCOUNT</Text>
       {/* Language Dropdown */}
       {/* <Dropdown
@@ -66,18 +127,18 @@ const SignUp = () => {
         Selected Language: {language ? language : "None"}
       </Text> */}
       {/* First Name */}
-      <TextInput
+      {/* <TextInput
         style={styles.input}
         placeholder="First Name"
         placeholderTextColor={"#154D71"}
         value={form.firstName}
-        onChangeText={(value) => handleChange("fistName", value)}
-      />
+        onChangeText={(value) => handleChange("firstName", value)}
+      /> */}
 
       {/* Last Name */}
       <TextInput
         style={styles.input}
-        placeholder="Last Name"
+        placeholder="User Name"
         placeholderTextColor={"#154D71"}
         value={form.lastName}
         onChangeText={(value) => handleChange("lastName", value)}
@@ -171,7 +232,14 @@ const SignUp = () => {
         </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.singupcontainer}>
-        <Text style={styles.singupText}>Singup</Text>
+        <Text
+          style={styles.singupText}
+          onPress={() => {
+            signUp();
+          }}
+        >
+          Singup
+        </Text>
       </TouchableOpacity>
       <Text
         style={styles.termsandConditions}
@@ -264,5 +332,21 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     color: "red",
+  },
+  backButtonWrapper: {
+    position: "absolute",
+    top: 20, // adjust for status bar
+    left: 20,
+  },
+  backButton: {
+    color: "#fff",
+    // borderRadius: 10,
+  },
+  backbuttonInsidewrapper: {
+    borderRadius: 12,
+    backgroundColor: "#154D71",
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    color: "#fff",
   },
 });

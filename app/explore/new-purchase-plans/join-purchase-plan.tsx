@@ -14,40 +14,38 @@ const JoinPurchasePlan = () => {
   const [profileData, setProfileData] = useState<any>();
 
   const handlePress = () => setExpanded(!expanded);
-  console.log(cardNo?.Column1, "cardNo");
+  console.log(cardNo, "cardNo");
   console.log(params, "params");
   console.log(profileData, "profileData");
+  const tenantName = localStorage.getItem("tenantName");
 
   const addCardNo = async () => {
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=SCHEME_MEMBER&column=CNO`,
-        {
-          headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
-          },
-        }
+        { headers: { tenantName: tenantName } }
       );
-      const data: any = response?.data[0];
+      const data: number = response?.data[0]?.Column1 || 0;
       setCardNo(data);
+      return data; // return value for immediate use
     } catch (err) {
       console.log(err);
+      return 0;
     }
   };
+
   const addRecieptNo = async () => {
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
-        {
-          headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
-          },
-        }
+        { headers: { tenantName: tenantName } }
       );
-      const data: any = response?.data[0];
+      const data: number = response?.data[0]?.Column1 || 0;
       setReceiptNo(data);
+      return data;
     } catch (err) {
       console.log(err);
+      return 0;
     }
   };
   const getProfile = async () => {
@@ -56,7 +54,7 @@ const JoinPurchasePlan = () => {
         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_MEMBER_PROFILE&where=MOBILENO%3D%27999%27`,
         {
           headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
+            tenantName: tenantName,
           },
         }
       );
@@ -66,17 +64,16 @@ const JoinPurchasePlan = () => {
       console.log(err);
     }
   };
-  const addRecieptMast = async () => {
+  const addRecieptMast = async (card: number, receipt: number) => {
     const payload = {
-      recNo: receiptNo?.Column1 + 1,
-      recDate: new Date()?.toISOString(),
-      rectime: new Date()?.toISOString(),
-      empCode: "string", // If dynamic, update later
+      recNo: receipt + 1,
+      recDate: new Date().toISOString(),
+      rectime: new Date().toISOString(),
+      empCode: "string",
       schemeGroup: params?.SchemeGroup || "string",
       schemeName: params?.SchemeName || "string",
-      // goldRate: goldRates[index]?.RATE || 0,
       goldRate: 0,
-      cardNo: cardNo?.Column1 + 1,
+      cardNo: String(card + 1), // ✅ Convert to string
       phno: profileData?.MOBILENO || "string",
       schemeMember: profileData?.SchemeMember || "string",
       add1: profileData?.add1 || "string",
@@ -85,23 +82,20 @@ const JoinPurchasePlan = () => {
       schemeAmount: params?.SchemeAmount || 0,
       schemeDuration: params?.SchemeDuration || 0,
       bonusAmount: params?.BonusAmount || 0,
-      amount: params?.SchemeAmount,
-      recAmount: params?.SchemeAmount, // ✅ required by API
-      goldWt: 0, // ✅ required by API
+      amount: params?.SchemeAmount || 0,
+      recAmount: params?.SchemeAmount || 0,
+      goldWt: 0,
       schemeValue: params?.SchemeValue || 0,
       schemeJDate: params?.SchemeJoinDate || new Date().toISOString(),
       schemeENDDate: params?.SchemeEndDate || new Date().toISOString(),
       incharger: "App",
       narr: "-",
-      uname: profileData?.SchemeMember, // if you have logged-in user, replace this
+      uname: profileData?.SchemeMember || "string",
       schemeType: params?.SchemeType || "string",
-      // fyear: schemeData?.fyear || "string",
       fyear: "25-26",
       instno: 1,
-      // instno: installmentNo,
       pregoldwt: 0,
-      // cash: cashAmount,
-      cash: params?.SchemeAmount,
+      cash: params?.SchemeAmount || 0,
       card: 0,
       upi: 0,
       online: 0,
@@ -109,7 +103,7 @@ const JoinPurchasePlan = () => {
       area: profileData?.area || "",
       clouD_UPLOAD: true,
 
-      // ❌ Optional/Not used — REMOVE unless backend requires them:
+      // Optional fields
       mode: "CASH",
       accno: "string",
       chequeno: "string",
@@ -121,13 +115,15 @@ const JoinPurchasePlan = () => {
       modetype: "string",
       accname: "string",
     };
+    console.log(payload, "payload");
+
     try {
       const response = await axios.post(
         `${CREATE_JEWEL}/api/Master/ReceiptMastInsert`,
         payload,
         {
           headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
+            tenantName: tenantName,
           },
         }
       );
@@ -136,28 +132,27 @@ const JoinPurchasePlan = () => {
     }
   };
 
-  const addRecieptPayment = async () => {
-    const tablePayloads =
+  const addRecieptPayment = async (card: number, receipt: number) => {
+    const tablePayloads = [
       // tableData.map((record, index) => (
       {
-        recno: receiptNo?.Column1 + 1, // Use receiptNo
-        recdate: new Date().toISOString(), // Use the selected date
+        recno: receipt + 1,
+        recdate: new Date().toISOString(),
         scmgroup: params?.SchemeGroup || "string",
         scmname: params?.SchemeName || "string",
         scmmember: profileData?.SchemeMember || "string",
-        cardno: cardNo,
-        sno: 1, // Pass the serial number (index + 1)
+        cardno: String(card + 1),
+        sno: 1,
         paymode: "CASH",
-        // paymode: record.paymentMode || "string",
-        // accno: record.accNo || "string",
         accno: "string",
-        descr: "-",
-        particulars: "-",
+        descr: "string",
+        particulars: "string",
         amt: Number(params?.SchemeAmount) || 0,
-        recamt: Number(params?.SchemeAmount), // Pass the calculated paid amount
-        fyear: "25-26", // Pass FYEAR here
+        recamt: Number(params?.SchemeAmount),
+        fyear: "25-26",
         clouD_UPLOAD: true,
-      };
+      },
+    ];
     // ));
     try {
       const response = await axios.post(
@@ -165,7 +160,7 @@ const JoinPurchasePlan = () => {
         tablePayloads,
         {
           headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
+            tenantName: tenantName,
           },
         }
       );
@@ -173,14 +168,14 @@ const JoinPurchasePlan = () => {
       console.log(err);
     }
   };
-  const addMemberDetails = async () => {
+  const addMemberDetails = async (card: number, receipt: number) => {
     const memberCardPayload = {
       sno: 1, // Use installmentNo as sno
-      recno: receiptNo + 1,
+      recno: receipt + 1,
       recdate: new Date().toISOString(),
       pstatus: true,
-      cardno: cardNo,
-      month: "-", // Use SchemeJoinDate for month
+      cardno: String(card + 1),
+      month: "string", // Use SchemeJoinDate for month
       schemetype: params?.SchemeType || "string",
       schemegroup: params?.SchemeGroup || "string",
       schemename: params?.SchemeName || "string",
@@ -188,7 +183,7 @@ const JoinPurchasePlan = () => {
       adD1: profileData?.add1 || "string",
       adD2: profileData?.add2 || "string",
       adD3: profileData?.add3 || "string",
-      adD4: "",
+      adD4: profileData?.add4 || "string",
       area: profileData?.area || "string",
       schemeamount: params?.SchemeAmount || 0,
       schemeduration: params?.SchemeDuration || 0,
@@ -202,7 +197,7 @@ const JoinPurchasePlan = () => {
         memberCardPayload,
         {
           headers: {
-            tenantName: "9xtigYG3LOE79Wvow3ymTg==",
+            tenantName: tenantName,
           },
         }
       );
@@ -214,6 +209,20 @@ const JoinPurchasePlan = () => {
   useEffect(() => {
     getProfile();
   }, []);
+
+  const handleCreateApi = async () => {
+    try {
+      const card = await addCardNo();
+      const receipt = await addRecieptNo();
+
+      // Now these values are set, safe to call dependent functions
+      await addRecieptMast(card, receipt);
+      await addMemberDetails(card, receipt);
+      await addRecieptPayment(card, receipt);
+    } catch (err) {
+      console.log("Error in processing:", err);
+    }
+  };
 
   return (
     <ScrollView>
@@ -410,13 +419,14 @@ const JoinPurchasePlan = () => {
               marginTop: 10,
             }}
             onPress={() => {
-              addCardNo();
-              addRecieptNo();
-              setTimeout(() => {
-                addRecieptMast();
-                addMemberDetails();
-                addRecieptPayment();
-              }, 5000);
+              // addCardNo();
+              // addRecieptNo();
+              // setTimeout(() => {
+              //   addRecieptMast();
+              //   addMemberDetails();
+              //   addRecieptPayment();
+              // }, 5000);
+              handleCreateApi();
             }}
           >
             <Text
@@ -433,10 +443,6 @@ const JoinPurchasePlan = () => {
           </Pressable>
         </Card.Content>
       </Card>
-      <View>
-        <Text>Card: {cardNo ? cardNo?.Column1 + 1 : ""}</Text>
-        <Text>Receipt :{receiptNo ? receiptNo?.Column1 + 1 : ""}</Text>
-      </View>
     </ScrollView>
   );
 };

@@ -5,20 +5,35 @@ import { Button, StyleSheet, Text, View } from "react-native";
 
 const Logout = () => {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, setIsLoggedIn } = useAuth();
+  // useEffect(() => {
+  //   if (localStorage.getItem("tenantName")) {
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, [localStorage.getItem("tenantName")]);
+  const logOut = () => {
+    logout();
+    router.replace("/");
+    localStorage.removeItem("tenantName");
+    localStorage.clear();
+    window.location.reload();
+  };
+  const goToHome = () => {
+    router.push("/"); // Navigate to home without logout
+  };
   return (
     <View style={styles.container}>
       <View>
         <Text>Are you sure you want to logout?</Text>
       </View>
-      <View>
-        <Button
-          title="Confirm Logout"
-          onPress={() => {
-            logout(); // clear auth
-            router.replace("/"); // go to login
-          }}
-        />
+      <View style={styles.buttonContainer}>
+        <Button title="Confirm Logout" onPress={logOut} />
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button title="Go To Home" onPress={goToHome} />
       </View>
     </View>
   );
@@ -27,13 +42,16 @@ const Logout = () => {
 export default Logout;
 
 const styles = StyleSheet.create({
-  logoutButton: {
-    padding: 15,
-    backgroundColor: "#000",
-    borderRadius: 10,
-  },
   container: {
-    // backgroundColor: "red",
     flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  textContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  buttonContainer: {
+    marginVertical: 10,
   },
 });

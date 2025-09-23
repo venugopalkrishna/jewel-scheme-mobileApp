@@ -8,12 +8,13 @@ const NewPlans = () => {
   const router = useRouter();
   const [schemeNames, setSchemeName] = useState();
   const [shchemeType, setSchemeTypes] = useState();
+  const tenantName = localStorage.getItem("tenantName");
 
   useEffect(() => {
     axios
       .get(
         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableName?tableName=SCHEME_TYPE`,
-        { headers: { tenantName: "9xtigYG3LOE79Wvow3ymTg==" } }
+        { headers: { tenantName: tenantName } }
       )
       .then((res: any) => {
         setSchemeName(res.data);

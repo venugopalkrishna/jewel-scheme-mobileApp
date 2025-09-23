@@ -9,6 +9,7 @@ const SchemeName = () => {
   const [schemeName, setSchemeName] = useState<any>([]);
   const router = useRouter();
   const params = useLocalSearchParams();
+  const tenantName = localStorage.getItem("tenantName");
 
   console.log(params, "params");
 
@@ -18,7 +19,7 @@ const SchemeName = () => {
         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_NAME&where=SCHEMETYPE='${
           params?.SchemeType ? params?.SchemeType : ""
         }'&order=SCHEME_SERIALNO`,
-        { headers: { tenantName: "9xtigYG3LOE79Wvow3ymTg==" } }
+        { headers: { tenantName: tenantName } }
       )
       .then((res) => {
         setSchemeName(res.data);

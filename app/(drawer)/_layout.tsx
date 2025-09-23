@@ -17,6 +17,7 @@ import { StyleSheet } from "react-native";
 
 export default function Layout() {
   const { login, isLogged } = useAuth();
+
   return (
     <Drawer
       screenOptions={{

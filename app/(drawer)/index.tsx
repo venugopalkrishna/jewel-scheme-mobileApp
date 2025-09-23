@@ -10,10 +10,19 @@ import Offers from "@/components/Homepages/Offers";
 import AdvertisementCarousel from "@/components/Homepages/AdvertisementCarousel";
 import Header from "@/components/Homepages/Header";
 import RateCard from "@/components/Homepages/RateCard";
+import { useAuth } from "@/context/AuthContext";
 import React from "react";
 import { SafeAreaView, ScrollView } from "react-native";
 
 export default function HomeScreen() {
+  const { login, setIsLoggedIn } = useAuth();
+  // useEffect(() => {
+  //   if (localStorage.getItem("tenantName")) {
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, [localStorage.getItem("tenantName")]);
   return (
     <ImageBackground
       source={require("../../assets/images/splash-icon.png")} // local image

@@ -34,10 +34,10 @@ export const MobileInput = (props: TextInputProps) => {
   return (
     <InputWithIcon
       keyboardType="phone-pad"
-      maxLength={10}
+      // maxLength={10}
       autoCorrect={false}
       autoCapitalize="none"
-      placeholder="Mobile number"
+      placeholder="User Name"
       placeholderTextColor={props.placeholderTextColor || "#154D71"}
       {...props}
       rightIcon={
