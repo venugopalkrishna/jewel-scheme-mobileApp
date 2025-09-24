@@ -3,8 +3,8 @@ import "dotenv/config";
 
 export default ({ config }) => ({
   ...config,
-  name: "jewelScheme-mobileApp",
-  slug: "jewelScheme-mobileApp",
+  name: "TimeseraJewelScheme",
+  slug: "TimeseraJewelScheme",
   assetBundlePatterns: ["assets/images/*", "assets/fonts/*"],
   // whatever else you had in app.json...
   extra: {

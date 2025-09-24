@@ -1,22 +1,23 @@
 {
   "expo": {
-    "name": "jewelScheme-mobileApp",
-    "slug": "jewelScheme-mobileApp",
+    "name": "TimeseraJewelScheme",
+    "slug": "TimeseraJewelScheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "jewelschememobileapp",
+    "scheme": "timeserajewelscheme",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": [
-      "assets/images/*",
-      "assets/fonts/*"
-    ],
+    "assetBundlePatterns": ["assets/images/*", "assets/fonts/*"],
     "splash": {
       "backgroundColor": "#ffffff"
     },
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.timesera.timeserajewelscheme",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +26,7 @@
       },
       "backgroundColor": "#ffffff",
       "edgeToEdgeEnabled": true,
-      "package": "com.madhubabu8.jewelSchememobileApp"
+      "package": "com.timesera.timeserajewelscheme"
     },
     "web": {
       "bundler": "metro",
