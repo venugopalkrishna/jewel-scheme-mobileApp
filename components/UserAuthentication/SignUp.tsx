@@ -82,8 +82,6 @@ const SignUp = () => {
         }
       );
 
-      console.log(response?.data);
-
       if (response?.data) {
         setForm({
           firstName: "",
@@ -103,8 +101,6 @@ const SignUp = () => {
   const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
   };
-
-  console.log(form, "form");
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

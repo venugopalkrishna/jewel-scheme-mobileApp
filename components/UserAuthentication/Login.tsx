@@ -45,7 +45,6 @@ export default function Login() {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Tenant/CheckValidSchemeUser?userName=${form?.userName}&password=${form?.password}`
       );
-      console.log(response?.data, "data");
 
       if (response?.data) {
         // ✅ Store login status in AsyncStorage

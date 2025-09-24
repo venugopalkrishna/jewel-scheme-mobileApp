@@ -15,9 +15,6 @@ const JoinPurchasePlan = () => {
   const [profileData, setProfileData] = useState<any>();
 
   const handlePress = () => setExpanded(!expanded);
-  console.log(cardNo, "cardNo");
-  console.log(params, "params");
-  console.log(profileData, "profileData");
 
   const addCardNo = async () => {
     const storedTenant = await AsyncStorage.getItem("tenantName");
@@ -146,7 +143,7 @@ const JoinPurchasePlan = () => {
         cardno: String(card + 1),
         sno: 1,
         paymode: "CASH",
-        accno: "string",
+        accno: "1234",
         descr: "string",
         particulars: "string",
         amt: Number(params?.SchemeAmount) || 0,

@@ -15,7 +15,6 @@ const NewArrivalsBanner = () => {
   const groupedImages = [];
   for (let i = 0; i < images.length; i += 2) {
     groupedImages.push(images.slice(i, i + 2));
-    console.log(groupedImages, "igroupww");
   }
 
   return (
