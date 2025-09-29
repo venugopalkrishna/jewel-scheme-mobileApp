@@ -20,7 +20,7 @@ const menuItems = [
     title: "New Purchase Plan",
     iconType: "Foundation",
     icon: "burst-new",
-    route: "newPlan",
+    route: "new-plan",
   },
   {
     title: "My Plans",
@@ -77,18 +77,25 @@ export default function MenuGrid() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
+            // onPress={() => {
+            //   if (isLogged) {
+            //     // ✅ already logged in → navigate to route
+            //     // if (item?.route) {
+            //     // router.replace(`/(public)/${item?.route}` as any);
+            //     router.push(`/explore/${item?.route}` as any);
+
+            //     //   } else {
+            //     //     console.warn(`No route defined for ${item.title}`);
+            //     //   }
+            //   } else {
+            //     // ❌ not logged in → send to login page
+            //     router.replace("/(drawer)/login");
+            //   }
+            // }}
             onPress={() => {
               if (isLogged) {
-                // ✅ already logged in → navigate to route
-                // if (item?.route) {
-                // router.replace(`/(public)/${item?.route}` as any);
-                router.push(`/explore/${item?.route}` as any);
-
-                //   } else {
-                //     console.warn(`No route defined for ${item.title}`);
-                //   }
+                router.push(`/explore/${item.route}` as any);
               } else {
-                // ❌ not logged in → send to login page
                 router.replace("/(drawer)/login");
               }
             }}

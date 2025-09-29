@@ -6,7 +6,7 @@ export default function ExploreLayout() {
     <Stack screenOptions={{ headerShown: true }}>
       <Stack.Screen name="details-now" options={{ title: "Details" }} />
       <Stack.Screen
-        name="newPlan"
+        name="new-plan"
         // component={Details} // your component
         options={{
           header: () => <CustomHeader />, // set height here

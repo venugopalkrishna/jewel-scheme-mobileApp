@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "TimeseraJewelScheme",
-    "slug": "TimeseraJewelScheme",
+    "slug": "timesera-jewel-scheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -53,12 +53,10 @@
       "API_URL": "https://jewelerp.timeserasoftware.in",
       "JEWEL_SERVICE_URL": "https://jewelerp.timeserasoftware.in",
       "eas": {
-        "projectId": "5d7c47ab-4d27-4ff4-b31f-3fd61d46eec3"
+        "projectId": "8bac7a9f-76ea-480c-88e7-fdd4b196e817"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/df75f1b8-46c0-4b75-b0e5-58e59c4ea7dc"
     }
