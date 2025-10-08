@@ -49,6 +49,7 @@ export default function Login() {
       if (response?.data) {
         // ✅ Store login status in AsyncStorage
         await AsyncStorage.setItem("tenantName", response?.data);
+        await AsyncStorage.setItem("userName", form?.userName);
 
         login();
         router.push("/(drawer)");

@@ -67,7 +67,7 @@ const SignUp = () => {
         pwd: form?.password,
         mobileno: form?.phone,
         firmname: "BALA GANESH JEWELLERY",
-        dbName: "APP_ORIGIN_JST",
+        dbName: "RETAILTIMES_LOGIN",
         clientName: "BALA GANESH",
       };
 

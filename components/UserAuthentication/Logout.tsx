@@ -11,6 +11,7 @@ const Logout = () => {
   const logOut = async () => {
     try {
       await AsyncStorage.removeItem("tenantName");
+      await AsyncStorage.removeItem("userName");
       logout();
       setIsLoggedIn(false);
       router.replace("/");

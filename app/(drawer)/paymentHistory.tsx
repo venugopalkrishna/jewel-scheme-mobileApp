@@ -1,15 +1,108 @@
-import PaymentHistory from "@/components/DrawerScreens/PaymentHistory";
+import Login from "@/components/UserAuthentication/Login";
+import { useAuth } from "@/context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const PaymentHistoryPage = () => {
+  const { login, isLogged, logout } = useAuth();
+  const router = useRouter();
   return (
-    <View>
-      <PaymentHistory />
-    </View>
+    <>
+      {isLogged == true ? (
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => router.replace("/")}>
+                <Ionicons name="arrow-back" size={24} color="#000" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>PAYMENT HISTORY</Text>
+              <View style={{ width: 24 }} />
+            </View>
+          </ScrollView>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+            <Image
+              source={require("../../assets/images/icon.png")} // replace with your logo
+              style={styles.footerLogo}
+              resizeMode="contain"
+            />
+          </View>
+        </SafeAreaView>
+      ) : (
+        <ImageBackground
+          source={require("../../assets/images/splash-icon.png")}
+          style={styles.logoutContainer}
+        >
+          <Login />
+        </ImageBackground>
+      )}
+    </>
   );
 };
 
 export default PaymentHistoryPage;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80, // ensures scroll area above footer
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 45,
+    backgroundColor: "#002D6B",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+  },
+  footerText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  footerLogo: {
+    width: 18,
+    height: 18,
+    marginLeft: 6,
+  },
+  logoutContainer: {
+    flex: 1, // take full screen
+  },
+});
