@@ -49,7 +49,12 @@ const MyProfileSettings = () => {
 
             {/* Options */}
             <View style={styles.optionsContainer}>
-              <TouchableOpacity style={styles.optionRow}>
+              <TouchableOpacity
+                style={styles.optionRow}
+                // onPress={() => {
+                //   router.replace("/explore/edit-profile");
+                // }}
+              >
                 <MaterialIcons name="edit" size={20} color="#000" />
                 <Text style={styles.optionText}>Edit Profile</Text>
                 <Ionicons name="chevron-forward" size={20} color="#000" />

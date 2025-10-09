@@ -26,6 +26,13 @@ export default function ExploreLayout() {
           header: () => <CustomHeader />,
         }}
       ></Stack.Screen>
+      <Stack.Screen
+        name="edit-profile"
+        // component={Details} // your component
+        // options={{
+        //   header: () => <CustomHeader />, // set height here
+        // }}
+      />
     </Stack>
   );
 }

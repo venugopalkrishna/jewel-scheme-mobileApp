@@ -17,31 +17,25 @@ import { Checkbox } from "react-native-paper";
 
 const SignUp = () => {
   const router = useRouter();
-  const { login, setIsLoggedIn } = useAuth();
-  // const [firstName, setFirstName] = useState("");
-  // const [lastName, setLastName] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [phone, setPhone] = useState("");
-  // const [password, setPassword] = useState("");
-  // const [confirmPassword, setConfirmPassword] = useState("");
+  const { setIsLoggedIn } = useAuth();
+
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
+    lastName: "", // username
     phone: "",
     password: "",
     confirmPassword: "",
   });
-  const [language, setLanguage] = useState<string | null>(null);
-  const [checked, setChecked] = useState(false);
+  const [errors, setErrors] = useState({
+    lastName: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
 
+  const [checked, setChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const data = [
-    { label: "English", value: "en" },
-    { label: "Telugu", value: "te" },
-    { label: "Hindi", value: "hi" },
-    { label: "❌ Clear Selection", value: null }, // 👈 extra option
-  ];
+  const [checkUser, setUserCheck] = useState(false);
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -60,12 +54,76 @@ const SignUp = () => {
     checkLogin();
   }, []);
 
+  const userCheckAPI = async () => {
+    try {
+      const userName = await AsyncStorage.getItem("userName");
+
+      // Call your backend API endpoint
+      const res = await axios.get(
+        `${CREATE_JEWEL}/api/Tenant/CheckSchemeUserExits?userName=${form?.lastName}`
+      );
+      setUserCheck(res?.data);
+    } catch (error) {
+      console.error("Account deletion error:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (form?.lastName) {
+      userCheckAPI();
+    }
+  }, [form?.lastName]);
+
+  const validateForm = () => {
+    let valid = true;
+    let newErrors = {
+      lastName: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    };
+
+    if (!form.lastName.trim()) {
+      newErrors.lastName = "Username is required.";
+      valid = false;
+    } else if (checkUser === true) {
+      newErrors.lastName = "Username already exists.";
+    }
+
+    if (!/^\d{10}$/.test(form.phone)) {
+      newErrors.phone = "Enter a valid 10-digit phone number.";
+      valid = false;
+    }
+
+    if (!form.password) {
+      newErrors.password = "Password is required.";
+      valid = false;
+    } else if (form.password.length < 4) {
+      newErrors.password = "Password must be at least 6 characters long.";
+      valid = false;
+    }
+
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = "Confirm your password.";
+      valid = false;
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match.";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
   const signUp = async () => {
+    if (!validateForm()) return;
+
     try {
       const payload = {
-        loginuser: form?.lastName,
-        pwd: form?.password,
-        mobileno: form?.phone,
+        loginuser: form.lastName,
+        pwd: form.password,
+        mobileno: form.phone,
         firmname: "BALA GANESH JEWELLERY",
         dbName: "RETAILTIMES_LOGIN",
         clientName: "BALA GANESH",
@@ -84,9 +142,7 @@ const SignUp = () => {
 
       if (response?.data) {
         setForm({
-          firstName: "",
           lastName: "",
-          email: "",
           phone: "",
           password: "",
           confirmPassword: "",
@@ -100,6 +156,7 @@ const SignUp = () => {
 
   const handleChange = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
+    setErrors({ ...errors, [key]: "" }); // clear error on change
   };
 
   return (
@@ -107,42 +164,15 @@ const SignUp = () => {
       <View style={styles.backButtonWrapper}>
         <TouchableOpacity
           style={styles.backbuttonInsidewrapper}
-          onPress={() => {
-            router.push("/(drawer)/login");
-          }}
+          onPress={() => router.push("/(drawer)/login")}
         >
           <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.creatAccount}> CREATE A NEW ACCOUNT</Text>
-      {/* Language Dropdown */}
-      {/* <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        itemTextStyle={styles.itemTextStyle}
-        activeColor="#e6f7ff"
-        containerStyle={styles.dropdownContainer}
-        data={data}
-        labelField="label"
-        valueField="value"
-        placeholder="Select Language"
-        value={language}
-        onChange={(item) => setLanguage(item.value)}
-      /> */}
-      {/* <Text style={{ marginTop: 20, fontSize: 16 }}>
-        Selected Language: {language ? language : "None"}
-      </Text> */}
-      {/* First Name */}
-      {/* <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        placeholderTextColor={"#154D71"}
-        value={form.firstName}
-        onChangeText={(value) => handleChange("firstName", value)}
-      /> */}
 
-      {/* Last Name */}
+      <Text style={styles.creatAccount}>CREATE A NEW ACCOUNT</Text>
+
+      {/* Username */}
       <TextInput
         style={styles.input}
         placeholder="User Name"
@@ -150,19 +180,11 @@ const SignUp = () => {
         value={form.lastName}
         onChangeText={(value) => handleChange("lastName", value)}
       />
+      {errors.lastName ? (
+        <Text style={styles.error}>{errors.lastName}</Text>
+      ) : null}
 
-      {/* Email */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email ID"
-        placeholderTextColor={"#154D71"}
-        value={form.email}
-        onChangeText={(value) => handleChange("email", value)}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      {/* Phone */}
+      {/* Phone Number */}
       <TextInput
         style={styles.input}
         placeholder="Phone Number"
@@ -171,8 +193,8 @@ const SignUp = () => {
         onChangeText={(value) => handleChange("phone", value)}
         keyboardType="phone-pad"
       />
+      {errors.phone ? <Text style={styles.error}>{errors.phone}</Text> : null}
 
-      {/* Password */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -192,11 +214,12 @@ const SignUp = () => {
               size={22}
               color="#154D71"
             />
-          ) : (
-            ""
-          )}
+          ) : null}
         </TouchableOpacity>
       </View>
+      {errors.password ? (
+        <Text style={styles.error}>{errors.password}</Text>
+      ) : null}
 
       {/* Confirm Password */}
       <View style={styles.inputContainer}>
@@ -218,43 +241,35 @@ const SignUp = () => {
               size={22}
               color="#154D71"
             />
-          ) : (
-            ""
-          )}
+          ) : null}
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.row}
-        onPress={() => {
-          setChecked(!checked);
-        }}
-      >
+      {errors.confirmPassword ? (
+        <Text style={styles.error}>{errors.confirmPassword}</Text>
+      ) : null}
+
+      {/* Terms Checkbox */}
+      <TouchableOpacity style={styles.row} onPress={() => setChecked(!checked)}>
         <Checkbox
           status={checked ? "checked" : "unchecked"}
           color="#154D71"
           uncheckedColor="#154D71"
-        ></Checkbox>
+        />
         <Text style={styles.termsandConditions}>
           By Registering, you agree to all terms and conditions
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.singupcontainer}>
-        <Text
-          style={styles.singupText}
-          onPress={() => {
-            signUp();
-          }}
-        >
-          Singup
-        </Text>
+
+      {/* Signup Button */}
+      <TouchableOpacity style={styles.singupcontainer} onPress={signUp}>
+        <Text style={styles.singupText}>Signup</Text>
       </TouchableOpacity>
+
       <Text
         style={styles.termsandConditions}
-        onPress={() => {
-          router.push("/(drawer)/login");
-        }}
+        onPress={() => router.push("/(drawer)/login")}
       >
-        Already having account?
+        Already have an account?
       </Text>
     </ScrollView>
   );
@@ -273,35 +288,10 @@ const styles = StyleSheet.create({
     borderColor: "#154D71",
     borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 12,
+    marginBottom: 6,
     fontSize: 16,
     backgroundColor: "#fafafa",
     width: "90%",
-  },
-  dropdown: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: "#fff",
-    marginBottom: 12,
-  },
-  dropdownContainer: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#aaa",
-    backgroundColor: "#fefefe",
-    paddingVertical: 5,
-  },
-  placeholderStyle: { fontSize: 16, color: "#154D71" },
-  selectedTextStyle: { fontSize: 16, color: "black" },
-  itemTextStyle: { fontSize: 16, color: "#333" },
-  creatAccount: {
-    color: "#154D71",
-    fontSize: 13,
-    fontWeight: "400",
-    marginVertical: 20,
   },
   inputContainer: {
     flexDirection: "row",
@@ -313,14 +303,11 @@ const styles = StyleSheet.create({
     right: 35,
     top: 15,
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginLeft: 25,
-  },
-  label: {
-    fontSize: 14,
+  creatAccount: {
+    color: "#154D71",
+    fontSize: 15,
+    fontWeight: "500",
+    marginVertical: 20,
   },
   singupcontainer: {
     width: "100%",
@@ -332,28 +319,37 @@ const styles = StyleSheet.create({
   singupText: {
     color: "#fff",
     textAlign: "center",
+    fontSize: 16,
   },
   termsandConditions: {
     color: "#154D71",
     marginVertical: 15,
+    fontSize: 13,
   },
-  checkbox: {
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 25,
+  },
+  error: {
     color: "red",
+    fontSize: 12,
+    alignSelf: "flex-start",
+    marginLeft: 25,
+    marginBottom: 8,
   },
   backButtonWrapper: {
     position: "absolute",
-    top: 20, // adjust for status bar
+    top: 20,
     left: 20,
   },
   backButton: {
     color: "#fff",
-    // borderRadius: 10,
   },
   backbuttonInsidewrapper: {
     borderRadius: 12,
     backgroundColor: "#154D71",
     paddingHorizontal: 20,
     paddingVertical: 8,
-    color: "#fff",
   },
 });

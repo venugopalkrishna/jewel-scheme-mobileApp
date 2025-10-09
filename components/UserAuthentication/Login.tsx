@@ -17,6 +17,7 @@ export default function Login() {
   const { login, setIsLoggedIn } = useAuth();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [form, setForm] = useState({
     userName: "",
     password: "",
@@ -41,7 +42,12 @@ export default function Login() {
   }, []);
 
   const loginAPI = async () => {
+    setErrorMessage("");
     try {
+      if (!form.userName || !form.password) {
+        setErrorMessage("Enter username and password.");
+        return;
+      }
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Tenant/CheckValidSchemeUser?userName=${form?.userName}&password=${form?.password}`
       );
@@ -54,10 +60,11 @@ export default function Login() {
         login();
         router.push("/(drawer)");
       } else {
-        console.log("Invalid username or password");
+        setErrorMessage("Invalid username or password.");
       }
     } catch (error) {
       console.error("Error:", error);
+      setErrorMessage("Login failed. Please try again later.");
     }
   };
 
@@ -93,12 +100,21 @@ export default function Login() {
         <Text style={{ textAlign: "center" }}>Or</Text> */}
         <MobileInput
           value={form.userName}
-          onChangeText={(text) => setForm({ ...form, userName: text })}
+          onChangeText={(text) => {
+            setForm({ ...form, userName: text });
+            if (errorMessage) setErrorMessage("");
+          }}
         />
         <PasswordInput
           value={form.password}
-          onChangeText={(text) => setForm({ ...form, password: text })}
+          onChangeText={(text) => {
+            setForm({ ...form, password: text });
+            if (errorMessage) setErrorMessage("");
+          }}
         />
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
         <View style={styles.row}>
           <TouchableOpacity
             style={styles.row}
@@ -206,4 +222,10 @@ const styles = StyleSheet.create({
     color: "#154D71",
   },
   otpContainer: {},
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: "center",
+  },
 });

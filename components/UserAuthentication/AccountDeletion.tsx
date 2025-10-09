@@ -33,14 +33,12 @@ export default function AccountDeletionDialog({ visible, onClose }: any) {
 
   const deleteAccount = async () => {
     try {
-      const storedTenant = await AsyncStorage.getItem("tenantName");
       const userName = await AsyncStorage.getItem("userName");
 
       // Call your backend API endpoint
       const res = await axios.post(
-        `${CREATE_JEWEL}/api/Wholesal/DeleteDataFromGivenTableNameWithWhere?tableName=SCHEME_LOGINS&where=LOGINUSER='${userName}'`,
-        {},
-        { headers: { tenantName: storedTenant } }
+        `${CREATE_JEWEL}/api/Tenant/DeleteSchemeUser?userName=${userName}`,
+        {}
       );
     } catch (error) {
       console.error("Account deletion error:", error);

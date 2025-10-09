@@ -1,16 +1,19 @@
 import EditProfile from "@/components/UserAuthentication/EditProfile";
 import { ImageBackground, StyleSheet } from "react-native";
 
-export default function Details() {
+const EditProfilePage = () => {
   return (
     <ImageBackground
       source={require("../../assets/images/splash-icon.png")}
       style={styles.container}
-      resizeMode="cover"
     >
       <EditProfile />
     </ImageBackground>
   );
-}
+};
 
-const styles = StyleSheet.create({ container: { flex: 1 } });
+export default EditProfilePage;
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+});
