@@ -1,5 +1,4 @@
 import { CREATE_JEWEL } from "@/api";
-import GradientText from "@/utilities/LinearGradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useRouter } from "expo-router";
@@ -9,13 +8,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 
 const NewPlans = () => {
   const router = useRouter();
   const [schemeTypeData, setSchemeData] = useState<any[]>([]);
+
+  const myPlans = [];
 
   useEffect(() => {
     const fetchTenantAndData = async () => {
@@ -59,9 +59,9 @@ const NewPlans = () => {
             </TouchableOpacity>
           ))}
       </ScrollView> */}
-      {schemeTypeData.length > 0 ? (
+      {myPlans.length > 0 ? (
         <ScrollView contentContainerStyle={{ padding: 10 }}>
-          {schemeTypeData.map((item, index) => (
+          {/* {myPlans.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.card}
@@ -76,7 +76,7 @@ const NewPlans = () => {
               <GradientText text={item?.SchemeType} style={styles.cardTitle} />
               <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
             </TouchableOpacity>
-          ))}
+          ))} */}
         </ScrollView>
       ) : (
         <View style={styles.noDataContainer}>

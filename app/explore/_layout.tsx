@@ -13,6 +13,13 @@ export default function ExploreLayout() {
         }}
       />
       <Stack.Screen
+        name="may-plan"
+        // component={Details} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
         name="new-purchase-plans/schemeName/[sno]"
         // component={SchemeName}
         options={{

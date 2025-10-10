@@ -17,23 +17,31 @@ import {
 const RateHistoryPage = () => {
   const { login, isLogged, logout } = useAuth();
   const router = useRouter();
+  const rateHistory = [];
   return (
     <>
       {isLogged == true ? (
         <SafeAreaView style={styles.safeArea}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Header */}
-            <View style={styles.header}>
-              <TouchableOpacity onPress={() => router.replace("/")}>
-                <Ionicons name="arrow-back" size={24} color="#000" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>RATE HISTORY</Text>
-              <View style={{ width: 24 }} />
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.replace("/")}>
+              <Ionicons name="arrow-back" size={24} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>RATE HISTORY</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          {rateHistory.length > 0 ? (
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Render your data here */}
+            </ScrollView>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No Data Available</Text>
             </View>
-          </ScrollView>
+          )}
           <View style={styles.footer}>
             <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
             <Image
@@ -78,6 +86,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noDataText: {
+    fontSize: 18,
+    color: "#666",
+    fontWeight: "bold",
   },
   footer: {
     position: "absolute",
