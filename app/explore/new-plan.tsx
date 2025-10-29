@@ -5,7 +5,9 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Image,
   ImageBackground,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -36,11 +38,12 @@ const NewPlans = () => {
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/splash-icon.png")}
-      style={styles.container}
-    >
-      {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
+    <SafeAreaView style={styles.safeArea}>
+      <ImageBackground
+        source={require("../../assets/images/splash-icon.png")}
+        style={styles.container}
+      >
+        {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
         {Array.isArray(schemeTypeData) &&
           schemeTypeData.map((item, index) => (
             <TouchableOpacity
@@ -59,31 +62,48 @@ const NewPlans = () => {
             </TouchableOpacity>
           ))}
       </ScrollView> */}
-      {schemeTypeData.length > 0 ? (
-        <ScrollView contentContainerStyle={{ padding: 10 }}>
-          {schemeTypeData.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.card}
-              onPress={() =>
-                router.push({
-                  pathname:
-                    `/explore/new-purchase-plans/schemeName/[sno]` as any,
-                  params: { ...item },
-                })
-              }
-            >
-              <GradientText text={item?.SchemeType} style={styles.cardTitle} />
-              <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
-            </TouchableOpacity>
-          ))}
+        <ScrollView
+          contentContainerStyle={(styles.scrollContent, { flexGrow: 1 })}
+          showsVerticalScrollIndicator={false}
+        >
+          {schemeTypeData.length > 0 ? (
+            <ScrollView contentContainerStyle={{ padding: 10 }}>
+              {schemeTypeData.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.card}
+                  onPress={() =>
+                    router.push({
+                      pathname:
+                        `/explore/new-purchase-plans/schemeName/[sno]` as any,
+                      params: { ...item },
+                    })
+                  }
+                >
+                  <GradientText
+                    text={item?.SchemeType}
+                    style={styles.cardTitle}
+                  />
+                  <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No Data Available</Text>
+            </View>
+          )}
         </ScrollView>
-      ) : (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>No Data Available</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Image
+            source={require("../../assets/images/icon.png")} // replace with your logo
+            style={styles.footerLogo}
+            resizeMode="contain"
+          />
         </View>
-      )}
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
@@ -91,13 +111,20 @@ export default NewPlans;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  safeArea: {
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
 
   card: {
     backgroundColor: "#154D71",
     borderRadius: 12,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    marginVertical: 8,
+    paddingVertical: 25,
+    paddingHorizontal: 20,
+    marginVertical: 5,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -108,21 +135,46 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontFamily: "serif",
-    marginBottom: 4,
+    marginBottom: 15,
   },
 
   cardSubtitle: {
     color: "#fff",
     fontSize: 14,
+    marginTop: 10,
   },
   noDataContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    minHeight: 400,
   },
   noDataText: {
     fontSize: 18,
     color: "#666",
     fontWeight: "bold",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: "#002D6B",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+  },
+  footerText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  footerLogo: {
+    width: 18,
+    height: 18,
+    marginLeft: 6,
   },
 });

@@ -22,12 +22,14 @@ const SignUp = () => {
   const [form, setForm] = useState({
     lastName: "", // username
     phone: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({
     lastName: "",
     phone: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -80,6 +82,7 @@ const SignUp = () => {
     let newErrors = {
       lastName: "",
       phone: "",
+      email: "",
       password: "",
       confirmPassword: "",
     };
@@ -93,6 +96,14 @@ const SignUp = () => {
 
     if (!/^\d{10}$/.test(form.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number.";
+      valid = false;
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required.";
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Enter a valid email address.";
       valid = false;
     }
 
@@ -127,6 +138,7 @@ const SignUp = () => {
         firmname: "BALA GANESH JEWELLERY",
         dbName: "APP_ORIGIN_JST",
         clientName: "BALA GANESH",
+        emailid: form?.email,
       };
 
       const response = await axios.post(
@@ -144,6 +156,7 @@ const SignUp = () => {
         setForm({
           lastName: "",
           phone: "",
+          email: "",
           password: "",
           confirmPassword: "",
         });
@@ -194,6 +207,15 @@ const SignUp = () => {
         keyboardType="phone-pad"
       />
       {errors.phone ? <Text style={styles.error}>{errors.phone}</Text> : null}
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor={"#154D71"}
+        value={form.email}
+        onChangeText={(value) => handleChange("email", value)}
+      />
+      {errors.email ? <Text style={styles.error}>{errors.email}</Text> : null}
 
       <View style={styles.inputContainer}>
         <TextInput

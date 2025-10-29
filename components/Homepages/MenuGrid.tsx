@@ -42,10 +42,10 @@ const menuItems = [
     route: "/total-weight",
   },
   {
-    title: "My Wallet",
-    iconType: "Ionicons",
-    icon: "wallet",
-    route: "/my-wallet",
+    title: "Closed Accounts",
+    iconType: "MaterialIcons",
+    icon: "logout",
+    route: "/closed-accounts",
   },
 ];
 

@@ -1,5 +1,14 @@
 PODS:
   - boost (1.84.0)
+  - CashfreeAnalyticsSDK (2.2.0):
+    - CFNetworkSDK (= 2.2.0)
+  - CashfreePG (2.2.4):
+    - CashfreePGUISDK (= 2.2.4)
+  - CashfreePGCoreSDK (2.2.4):
+    - CashfreeAnalyticsSDK (= 2.2.0)
+  - CashfreePGUISDK (2.2.4):
+    - CashfreePGCoreSDK (= 2.2.4)
+  - CFNetworkSDK (2.2.0)
   - DoubleConversion (1.1.6)
   - EASClient (0.14.4):
     - ExpoModulesCore
@@ -1710,6 +1719,9 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
+  - react-native-cashfree-pg-sdk (2.2.5):
+    - CashfreePG (= 2.2.4)
+    - React-Core
   - react-native-safe-area-context (5.4.0):
     - DoubleConversion
     - glog
@@ -2460,6 +2472,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - react-native-cashfree-pg-sdk (from `../node_modules/react-native-cashfree-pg-sdk`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2502,6 +2515,11 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - CashfreeAnalyticsSDK
+    - CashfreePG
+    - CashfreePGCoreSDK
+    - CashfreePGUISDK
+    - CFNetworkSDK
     - libavif
     - libdav1d
     - libwebp
@@ -2644,6 +2662,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-cashfree-pg-sdk:
+    :path: "../node_modules/react-native-cashfree-pg-sdk"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -2725,6 +2745,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
+  CashfreeAnalyticsSDK: ae25b71a54607c920d519103d154d9727ca2c15a
+  CashfreePG: 6554c215b8eabc9fa13e59c847262b8ba6f29ff6
+  CashfreePGCoreSDK: 133e1ba5aeb8a89bf2188eb3312c88fcad084c75
+  CashfreePGUISDK: 5e943fcca20c45b66c9837bbb87ebbfb75c013a5
+  CFNetworkSDK: 4e431b55f607544f5ca45bc1a36a13e602f51841
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EASClient: fe396f88189ce51edd819abe12df16c99e98bcd2
   EXConstants: 98bcf0f22b820f9b28f9fee55ff2daededadd2f8
@@ -2793,6 +2818,7 @@ SPEC CHECKSUMS:
   React-logger: 1426d04b594a2e68b0ac2add21d45422d06397a3
   React-Mapbuffer: 70a29536f84ddffca4a91097651d2b8f194f7c67
   React-microtasksnativemodule: ff05e894231c44c21135d1d23a82b87656d98eeb
+  react-native-cashfree-pg-sdk: 1641b1e1fa40daaa325accb8c615224075e1704b
   react-native-safe-area-context: 562163222d999b79a51577eda2ea8ad2c32b4d06
   react-native-webview: 520bcb79c3f2af91e157cdd695732a34ab5f25c8
   React-NativeModulesApple: d94850b316446b0c39a82eb278d6efaa1a634055

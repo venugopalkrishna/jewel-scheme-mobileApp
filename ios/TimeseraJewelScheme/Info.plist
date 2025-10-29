@@ -28,7 +28,6 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>timeserajewelscheme</string>
-          <string>com.timesera.timeserajewelscheme</string>
         </array>
       </dict>
       <dict>
@@ -42,6 +41,15 @@
     <string>1</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>phonepe</string>
+      <string>tez</string>
+      <string>paytmmp</string>
+      <string>bhim</string>
+      <string>amazonpay</string>
+      <string>credpay</string>
+    </array>
     <key>LSMinimumSystemVersion</key>
     <string>12.0</string>
     <key>LSRequiresIPhoneOS</key>

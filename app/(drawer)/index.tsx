@@ -1,4 +1,11 @@
-import { ImageBackground, StyleSheet, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  Linking,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import "react-native-gesture-handler";
 
 // import AdvertisementCarousel from "@/components/Homepages/AdvertisementCarousel";
@@ -36,6 +43,16 @@ export default function HomeScreen() {
 
     checkLogin();
   }, []);
+
+  const openWhatsApp = () => {
+    const phoneNumber = "+919440353589"; // Replace with your business number
+    Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
+  };
+
+  const makePhoneCall = () => {
+    const phoneNumber = "tel:+919440353589"; // Replace with your number
+    Linking.openURL(phoneNumber);
+  };
   return (
     <ImageBackground
       source={require("../../assets/images/splash-icon.png")} // local image
@@ -53,6 +70,20 @@ export default function HomeScreen() {
           <Offers />
           <NewArrivalsBanner />
         </ScrollView>
+        <TouchableOpacity style={styles.callButton} onPress={makePhoneCall}>
+          <Image
+            source={require("../../assets/images/call.png")} // use your phone icon
+            style={styles.icon1}
+          />
+        </TouchableOpacity>
+
+        {/* ✅ Floating WhatsApp Button */}
+        <TouchableOpacity style={styles.whatsappButton} onPress={openWhatsApp}>
+          <Image
+            source={require("../../assets/images/whatsapp.png")} // use your WhatsApp icon
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -73,5 +104,41 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     // backgroundColor: "rgba(0.5,0.5,0.4,0.4.9)",
     backgroundColor: "transparent",
+  },
+  callButton: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    backgroundColor: "#fff",
+    borderRadius: 50,
+    padding: 5,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  whatsappButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 20,
+    backgroundColor: "#4AAD50",
+    borderRadius: 50,
+    // padding: 5,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  icon: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  icon1: {
+    width: 30,
+    height: 30,
+    resizeMode: "contain",
   },
 });

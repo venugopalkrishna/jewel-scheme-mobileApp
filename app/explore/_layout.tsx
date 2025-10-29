@@ -13,7 +13,35 @@ export default function ExploreLayout() {
         }}
       />
       <Stack.Screen
-        name="may-plan"
+        name="my-plans"
+        // component={Details} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="paid-amount"
+        // component={Details} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="total-weight"
+        // component={Details} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="closed-accounts"
+        // component={Details} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="pay-ema"
         // component={Details} // your component
         options={{
           header: () => <CustomHeader />, // set height here

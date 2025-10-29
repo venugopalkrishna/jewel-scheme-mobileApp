@@ -1,14 +1,42 @@
+import { Ionicons } from "@expo/vector-icons";
 import MaskedView from "@react-native-masked-view/masked-view";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "react-native-gesture-handler";
+
+type RootStackParamList = {
+  "pay-ema": undefined;
+  "my-plans": undefined;
+  "paid-amount": undefined;
+  [key: string]: undefined; // fallback for other routes
+};
 
 export default function CustomHeader() {
   //   const [fontsLoaded] = useFonts({
   //     Perpetua: require("../assets/fonts/SpaceMono-Regular.ttf"),
   //   });
+  const [title, setTitle] = useState("");
 
-  // const navigation = useNavigation();
+  const navigation = useNavigation();
+  const route = useRoute();
+
+  console.log(route.name);
+
+  const routeTitles: Record<string, string> = {
+    "pay-ema": "Pay Ema",
+    "my-plans": "My Plans",
+    "paid-amount": "Paid Amount",
+    "total-weight": "Total Weight",
+    "closed-accounts": "Closed Accounts",
+    "new-plan": "New Plans",
+    "new-purchase-plans/schemeName/[sno]": "Scheme Join",
+    "new-purchase-plans/join-purchase-plan": "Payment",
+  };
+
+  // 👇 Default title if route doesn’t match
+  const currentTitle = routeTitles[route.name] || "TIMESERA";
 
   return (
     <LinearGradient
@@ -18,6 +46,14 @@ export default function CustomHeader() {
       style={styles.header}
     >
       {/* Menu Icon */}
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Ionicons
+          name="arrow-back"
+          size={28}
+          color="#fff"
+          style={styles.menu}
+        />
+      </TouchableOpacity>
 
       {/* Logo */}
       <Image
@@ -31,7 +67,7 @@ export default function CustomHeader() {
         <MaskedView
           maskElement={
             <Text style={[styles.title, { backgroundColor: "transparent" }]}>
-              TIMESERA
+              {currentTitle}
             </Text>
           }
         >
@@ -40,7 +76,7 @@ export default function CustomHeader() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={[styles.title, { opacity: 0 }]}>TIMESERA</Text>
+            <Text style={[styles.title, { opacity: 0 }]}>{currentTitle}</Text>
           </LinearGradient>
         </MaskedView>
 
@@ -52,7 +88,7 @@ export default function CustomHeader() {
             </Text>
           }
         >
-          <LinearGradient
+          {/* <LinearGradient
             colors={["#ecdb7eff", "#fff7b2ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -60,11 +96,19 @@ export default function CustomHeader() {
             <Text style={[styles.subtitle, { opacity: 0 }]}>
               GOLD{"   "}|{"   "}SILVER{"   "}|{"   "}DIAMOND
             </Text>
-          </LinearGradient>
+          </LinearGradient> */}
         </MaskedView>
       </View>
 
       {/* Notification Icon */}
+      <TouchableOpacity>
+        {/* <Ionicons
+          name="notifications"
+          size={24}
+          color="#fff"
+          style={styles.notificaton}
+        /> */}
+      </TouchableOpacity>
     </LinearGradient>
   );
 }
@@ -81,7 +125,7 @@ const commonCircleStyle = {
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 20,
     paddingHorizontal: 5,

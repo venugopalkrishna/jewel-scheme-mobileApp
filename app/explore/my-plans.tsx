@@ -4,29 +4,31 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Image,
   ImageBackground,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
-const NewPlans = () => {
+const MyPlans = () => {
   const router = useRouter();
-  const [schemeTypeData, setSchemeData] = useState<any[]>([]);
-
-  const myPlans = [];
+  const [schemeMemberData, setSchemeMemberData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchTenantAndData = async () => {
       try {
+        const userName = await AsyncStorage.getItem("userName");
         const storedTenant = await AsyncStorage.getItem("tenantName");
         if (storedTenant) {
           const res = await axios.get(
-            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithOrder?tableName=SCHEME_TYPE&order=SNO`,
+            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
             { headers: { tenantName: storedTenant } }
           );
-          setSchemeData(res.data || []);
+          setSchemeMemberData(res.data || []);
+          console.log(res.data);
         }
       } catch (err) {
         console.log("Error fetching data:", err);
@@ -36,11 +38,12 @@ const NewPlans = () => {
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/splash-icon.png")}
-      style={styles.container}
-    >
-      {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
+    <SafeAreaView style={styles.safeArea}>
+      <ImageBackground
+        source={require("../../assets/images/splash-icon.png")}
+        style={styles.container}
+      >
+        {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
         {Array.isArray(schemeTypeData) &&
           schemeTypeData.map((item, index) => (
             <TouchableOpacity
@@ -59,70 +62,219 @@ const NewPlans = () => {
             </TouchableOpacity>
           ))}
       </ScrollView> */}
-      {myPlans.length > 0 ? (
-        <ScrollView contentContainerStyle={{ padding: 10 }}>
-          {/* {myPlans.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.card}
-              onPress={() =>
-                router.push({
-                  pathname:
-                    `/explore/new-purchase-plans/schemeName/[sno]` as any,
-                  params: { ...item },
-                })
-              }
-            >
-              <GradientText text={item?.SchemeType} style={styles.cardTitle} />
-              <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
-            </TouchableOpacity>
-          ))} */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {schemeMemberData.length > 0 ? (
+            <ScrollView contentContainerStyle={{ padding: 10 }}>
+              {schemeMemberData.map((item, index) => (
+                // <TouchableOpacity
+                //   key={index}
+                //   style={styles.card}
+                //   onPress={() =>
+                //     router.push({
+                //       pathname:
+                //         `/explore/new-purchase-plans/schemeName/[sno]` as any,
+                //       params: { ...item },
+                //     })
+                //   }
+                // >
+                //   <GradientText
+                //     text={item?.SchemeType}
+                //     style={styles.cardTitle}
+                //   />
+                //   <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
+                // </TouchableOpacity>
+                <View key={index} style={styles.schemeBox}>
+                  <Text style={styles.cnoText1}>
+                    CNO : <Text style={styles.cnoText}>{item?.CNO || 0}</Text>
+                  </Text>
+                  <View style={styles.line} />
+
+                  <View style={styles.row}>
+                    <Text style={styles.label}>SchemeGroup</Text>
+                    <Text style={styles.colon}>:</Text>
+                    <Text style={styles.value}>{item?.SchemeGroup || "-"}</Text>
+                  </View>
+
+                  <View style={styles.row}>
+                    <Text style={styles.label}>SchemeName</Text>
+                    <Text style={styles.colon}>:</Text>
+                    <Text style={styles.value}>{item?.SchemeName || "-"}</Text>
+                  </View>
+
+                  <View style={styles.row}>
+                    <Text style={styles.label}>SchemeAmount</Text>
+                    <Text style={styles.colon}>:</Text>
+                    <Text style={styles.value}>
+                      {item?.SchemeAmount ? item.SchemeAmount.toFixed(2) : "-"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.row}>
+                    <Text style={styles.label}>SchemeDuration</Text>
+                    <Text style={styles.colon}>:</Text>
+                    <Text style={styles.value}>
+                      {item?.SchemeDuration || "-"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.row}>
+                    <Text style={styles.label}>SchemeJoinDate</Text>
+                    <Text style={styles.colon}>:</Text>
+                    <Text style={styles.value}>
+                      {item?.SchemeJoinDate
+                        ? new Date(item.SchemeJoinDate)
+                            .toLocaleDateString("en-GB")
+                            .replace(/\//g, "-")
+                        : "-"}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No Data Available</Text>
+            </View>
+          )}
         </ScrollView>
-      ) : (
-        <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>No Data Available</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Image
+            source={require("../../assets/images/icon.png")} // replace with your logo
+            style={styles.footerLogo}
+            resizeMode="contain"
+          />
         </View>
-      )}
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
-export default NewPlans;
+export default MyPlans;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
-  card: {
-    backgroundColor: "#154D71",
-    borderRadius: 12,
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    marginVertical: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Android shadow
+  safeArea: {
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80, // ensures scroll area above footer
   },
 
-  cardTitle: {
+  // card: {
+  //   backgroundColor: "#154D71",
+  //   borderRadius: 12,
+  //   paddingVertical: 25,
+  //   paddingHorizontal: 20,
+  //   marginVertical: 5,
+  //   shadowColor: "#000",
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.25,
+  //   shadowRadius: 3.84,
+  //   elevation: 5, // Android shadow
+  // },
+
+  // cardTitle: {
+  //   fontSize: 16,
+  //   fontFamily: "serif",
+  //   marginBottom: 15,
+  // },
+
+  // cardSubtitle: {
+  //   color: "#fff",
+  //   fontSize: 14,
+  //   marginTop: 10,
+  // },
+  schemeBox: {
+    borderWidth: 2,
+    borderColor: "#000",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    backgroundColor: "#fff",
+  },
+
+  cnoText: {
+    fontWeight: "bold",
     fontSize: 16,
-    fontFamily: "serif",
-    marginBottom: 4,
+    textAlign: "center",
+    marginBottom: 6,
+    // textDecorationLine: "underline",
   },
 
-  cardSubtitle: {
-    color: "#fff",
+  cnoText1: {
+    // fontWeight: "bold",
     fontSize: 14,
+    textAlign: "center",
+    marginBottom: 6,
+    // textDecorationLine: "underline",
+  },
+
+  line: {
+    borderBottomWidth: 1,
+    borderColor: "#000",
+    marginBottom: 10,
+  },
+
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 3,
+  },
+
+  label: {
+    width: 130,
+    fontSize: 15,
+    fontFamily: "serif",
+  },
+
+  colon: {
+    width: 10,
+    fontSize: 15,
+    fontFamily: "serif",
+  },
+
+  value: {
+    fontSize: 15,
+    fontFamily: "serif",
+    flexShrink: 1,
   },
   noDataContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    minHeight: 400,
   },
   noDataText: {
     fontSize: 18,
     color: "#666",
     fontWeight: "bold",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: "#002D6B",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+  },
+  footerText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  footerLogo: {
+    width: 18,
+    height: 18,
+    marginLeft: 6,
   },
 });

@@ -16,6 +16,19 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.timesera.timeserajewelscheme",
       "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": ["timeserajewelscheme"]
+          }
+        ],
+        "LSApplicationQueriesSchemes": [
+          "phonepe",
+          "tez",
+          "paytmmp",
+          "bhim",
+          "amazonpay",
+          "credpay"
+        ],
         "ITSAppUsesNonExemptEncryption": false
       }
     },
@@ -26,7 +39,19 @@
       },
       "backgroundColor": "#ffffff",
       "edgeToEdgeEnabled": true,
-      "package": "com.timesera.timeserajewelscheme"
+      "package": "com.timesera.timeserajewelscheme",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "timeserajewelscheme",
+              "host": "payment-response"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
