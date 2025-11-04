@@ -69,23 +69,6 @@ const MyPlans = () => {
           {schemeMemberData.length > 0 ? (
             <ScrollView contentContainerStyle={{ padding: 10 }}>
               {schemeMemberData.map((item, index) => (
-                // <TouchableOpacity
-                //   key={index}
-                //   style={styles.card}
-                //   onPress={() =>
-                //     router.push({
-                //       pathname:
-                //         `/explore/new-purchase-plans/schemeName/[sno]` as any,
-                //       params: { ...item },
-                //     })
-                //   }
-                // >
-                //   <GradientText
-                //     text={item?.SchemeType}
-                //     style={styles.cardTitle}
-                //   />
-                //   <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
-                // </TouchableOpacity>
                 <View key={index} style={styles.schemeBox}>
                   <Text style={styles.cnoText1}>
                     CNO : <Text style={styles.cnoText}>{item?.CNO || 0}</Text>
