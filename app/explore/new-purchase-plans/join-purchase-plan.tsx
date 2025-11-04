@@ -425,6 +425,8 @@ const JoinPurchasePlan = () => {
       email: "test@gmail.com",
       phone: "9999999999",
       amountRupees: 1,
+      clientId: "TEST10804152ea8f550b36566eb77f3425140801",
+      clientSecret: "cfsk_ma_test_7114389112ead3344231939c07f5efc9_aac301b4",
       userId: userName,
       cardNo: String(card + 1),
       schemeGroup: params?.SchemeGroup,
