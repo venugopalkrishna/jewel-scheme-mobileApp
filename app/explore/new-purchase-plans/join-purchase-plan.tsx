@@ -418,39 +418,39 @@ const JoinPurchasePlan = () => {
     handlePaymentCallbacks();
   }, [handlePaymentCallbacks]);
 
-  const cashfreePaymentAPI = async (card: number) => {
-    const userName = await AsyncStorage.getItem("userName");
-    const payBody = {
-      customerName: "Test",
-      email: "test@gmail.com",
-      phone: "9999999999",
-      amountRupees: 1,
-      //add client credentials
-      userId: userName,
-      cardNo: String(card + 1),
-      schemeGroup: params?.SchemeGroup,
-      schemeName: params?.SchemeName,
-      installmentno: "1",
-    };
-    try {
-      const storedTenant = await AsyncStorage.getItem("tenantName");
-      const response = await axios.post(
-        `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
-        payBody,
-        {
-          headers: {
-            tenantName: storedTenant,
-          },
-        }
-      );
-      const data = response.data;
-      if (data) {
-        startPayment(data);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // const cashfreePaymentAPI = async (card: number) => {
+  //   const userName = await AsyncStorage.getItem("userName");
+  //   const payBody = {
+  //     customerName: "Test",
+  //     email: "test@gmail.com",
+  //     phone: "9999999999",
+  //     amountRupees: 1,
+  //     //add client credentials
+  //     userId: userName,
+  //     cardNo: String(card + 1),
+  //     schemeGroup: params?.SchemeGroup,
+  //     schemeName: params?.SchemeName,
+  //     installmentno: "1",
+  //   };
+  //   try {
+  //     const storedTenant = await AsyncStorage.getItem("tenantName");
+  //     const response = await axios.post(
+  //       `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
+  //       payBody,
+  //       {
+  //         headers: {
+  //           tenantName: storedTenant,
+  //         },
+  //       }
+  //     );
+  //     const data = response.data;
+  //     if (data) {
+  //       startPayment(data);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const handleCreateApi = async () => {
     try {
@@ -461,7 +461,7 @@ const JoinPurchasePlan = () => {
       await addMemberDetails(card, receipt);
       await addRecieptPayment(card, receipt);
       await addMember(card, receipt);
-      await cashfreePaymentAPI(card);
+      // await cashfreePaymentAPI(card);
     } catch (err) {
       console.log("Error in processing:", err);
     }
