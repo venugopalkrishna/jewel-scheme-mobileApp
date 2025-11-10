@@ -418,6 +418,41 @@ const JoinPurchasePlan = () => {
     handlePaymentCallbacks();
   }, [handlePaymentCallbacks]);
 
+  const cashfreePaymentAPI = async (card: number) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const payBody = {
+      customerName: "Test",
+      email: "test@gmail.com",
+      phone: "9999999999",
+      amountRupees: 1,
+      clientId: "TEST10804152ea8f550b36566eb77f3425140801",
+      clientSecret: "cfsk_ma_test_7114389112ead3344231939c07f5efc9_aac301b4",
+      userId: userName,
+      cardNo: String(card + 1),
+      schemeGroup: params?.SchemeGroup,
+      schemeName: params?.SchemeName,
+      installmentno: "1",
+    };
+    try {
+      const storedTenant = await AsyncStorage.getItem("tenantName");
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
+        payBody,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      const data = response.data;
+      if (data) {
+        startPayment(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const handleCreateApi = async () => {
     try {
       const card = await addCardNo();
@@ -427,7 +462,7 @@ const JoinPurchasePlan = () => {
       await addMemberDetails(card, receipt);
       await addRecieptPayment(card, receipt);
       await addMember(card, receipt);
-      // await cashfreePaymentAPI(card);
+      await cashfreePaymentAPI(card);
     } catch (err) {
       console.log("Error in processing:", err);
     }
