@@ -418,40 +418,6 @@ const PaymentDue = () => {
     handlePaymentCallbacks();
   }, [handlePaymentCallbacks]);
 
-  // const cashfreePaymentAPI = async () => {
-  //   const userName = await AsyncStorage.getItem("userName");
-  //   const payBody = {
-  //     customerName: "Test",
-  //     email: "test@gmail.com",
-  //     phone: "9999999999",
-  //     amountRupees: 1,
-  //     //add client credentials
-  //     userId: userName,
-  //     cardNo: String(params?.CARDNO),
-  //     schemeGroup: params?.SchemeGroup,
-  //     schemeName: params?.SchemeName,
-  //     installmentno: "1",
-  //   };
-  //   try {
-  //     const storedTenant = await AsyncStorage.getItem("tenantName");
-  //     const response = await axios.post(
-  //       `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
-  //       payBody,
-  //       {
-  //         headers: {
-  //           tenantName: storedTenant,
-  //         },
-  //       }
-  //     );
-  //     const data = response.data;
-  //     if (data) {
-  //       startPayment(data);
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
-
   const handleCreateApi = async () => {
     try {
       //   const card = await addCardNo();
