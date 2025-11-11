@@ -1,9 +1,11 @@
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Foundation from "@expo/vector-icons/Foundation";
 
+import Feather from "@expo/vector-icons/Feather";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -47,6 +49,18 @@ const menuItems = [
     icon: "logout",
     route: "/closed-accounts",
   },
+  {
+    title: "Success",
+    iconType: "FontAwesome",
+    icon: "check",
+    route: "/success",
+  },
+  {
+    title: "Failed",
+    iconType: "Feather",
+    icon: "x",
+    route: "/failed",
+  },
 ];
 
 const iconMap: Record<string, any> = {
@@ -55,6 +69,8 @@ const iconMap: Record<string, any> = {
   FontAwesome5,
   Ionicons,
   MaterialIcons,
+  Feather,
+  FontAwesome,
 };
 
 export default function MenuGrid() {
