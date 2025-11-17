@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "191375348191",
+    "project_id": "jewel-scheme-app",
+    "storage_bucket": "jewel-scheme-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191375348191:android:4ae68da0adce7acb25b46a",
+        "android_client_info": {
+          "package_name": "com.timesera.timeserajewelscheme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsyF62_br61yQTt8gXlqlFPkuWezhvJnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

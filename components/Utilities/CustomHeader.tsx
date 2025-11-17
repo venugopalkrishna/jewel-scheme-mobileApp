@@ -10,6 +10,7 @@ type RootStackParamList = {
   "pay-ema": undefined;
   "my-plans": undefined;
   "paid-amount": undefined;
+  "joined-schemes": undefined;
   [key: string]: undefined; // fallback for other routes
 };
 
@@ -33,6 +34,7 @@ export default function CustomHeader() {
     "new-plan": "New Plans",
     "new-purchase-plans/schemeName/[sno]": "Scheme Join",
     "new-purchase-plans/join-purchase-plan": "Payment",
+    "joined-schemes": "Joined Schemes",
   };
 
   // 👇 Default title if route doesn’t match

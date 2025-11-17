@@ -20,6 +20,13 @@ export default function ExploreLayout() {
         }}
       ></Stack.Screen>
       <Stack.Screen
+        name="joined-schemes"
+        // component={<JoinedSchemes/>} // your component
+        options={{
+          header: () => <CustomHeader />, // set height here
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
         name="paid-amount"
         // component={Details} // your component
         options={{

@@ -44,6 +44,21 @@ export default function HomeScreen() {
     checkLogin();
   }, []);
 
+  // useEffect(() => {
+  //   const registerForPushNotifications = async () => {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== "granted") return;
+
+  //     // ✅ Register your device for push notifications (NativeNotify)
+  //     registerNNPushToken(32667, "buA6zsNTsskAZ8MllfVkM0");
+  //   };
+
   const openWhatsApp = () => {
     const phoneNumber = "+919440353589"; // Replace with your business number
     Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);

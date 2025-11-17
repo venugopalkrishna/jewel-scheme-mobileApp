@@ -12,128 +12,11 @@ import {
   Text,
   View,
 } from "react-native";
+import { Card } from "react-native-paper";
 
 const PaidAmount = () => {
   const router = useRouter();
   const [paidAmountData, setPaidAmountData] = useState<any[]>([]);
-
-  const receiptData = () => {
-    const data = [
-      {
-        RecNo: 17.0,
-        RecDate: "2025-10-28T07:33:37.343",
-        Rectime: "2025-10-28T07:33:37.343",
-        EmpCode: "string",
-        SchemeGroup: "1000 SCHEME",
-        SchemeName: "1000 SCHEME",
-        GoldRate: 0.0,
-        CardNo: "17",
-        Phno: "999",
-        SchemeMember: "TIMESRA",
-        Add1: "123",
-        add2: "456",
-        add3: "789",
-        SchemeAmount: 1000.0,
-        SchemeDuration: 10.0,
-        BonusAmount: 0.0,
-        Amount: 1000.0,
-        SchemeValue: 10000.0,
-        SchemeJDate: "2025-10-28T07:33:37.343",
-        RecAmount: 1000.0,
-        GoldWt: 0.0,
-        Mode: "CASH",
-        Accno: "string",
-        Chequeno: "string",
-        Incharger: "App",
-        Narr: "-",
-        UNAME: "TIMESRA",
-        SchemeType: "LAKSHMI KATAKSHAM GOLD SCHEME",
-        SchemeMode: "string",
-        SBMonths: 0.0,
-        GiftVoucher: 0.0,
-        Collect_Point: "string",
-        PAYMODE: "string",
-        MODETYPE: "string",
-        ACCNAME: "string",
-        FYEAR: "25-26",
-        INSTNO: 1.0,
-        PREGOLDWT: 0.0,
-        CLOUD_UPLOAD: true,
-        CASH: 1000.0,
-        CARD: 0.0,
-        UPI: 0.0,
-        ONLINE: 0.0,
-        CHEQUE: 0.0,
-        AREA: "NELLORE",
-        SchemeENDDate: "1900-01-01T00:00:00",
-        APP_USERID: "venugopal",
-      },
-      {
-        RecNo: 18.0,
-        RecDate: "2025-10-28T07:33:37.343",
-        Rectime: "2025-10-28T07:33:37.343",
-        EmpCode: "string",
-        SchemeGroup: "1000 SCHEME",
-        SchemeName: "1000 SCHEME",
-        GoldRate: 0.0,
-        CardNo: "17",
-        Phno: "999",
-        SchemeMember: "TIMESRA",
-        Add1: "123",
-        add2: "456",
-        add3: "789",
-        SchemeAmount: 1000.0,
-        SchemeDuration: 10.0,
-        BonusAmount: 0.0,
-        Amount: 1000.0,
-        SchemeValue: 10000.0,
-        SchemeJDate: "2025-10-28T07:33:37.343",
-        RecAmount: 1000.0,
-        GoldWt: 0.0,
-        Mode: "CASH",
-        Accno: "string",
-        Chequeno: "string",
-        Incharger: "App",
-        Narr: "-",
-        UNAME: "TIMESRA",
-        SchemeType: "LAKSHMI KATAKSHAM GOLD SCHEME",
-        SchemeMode: "string",
-        SBMonths: 0.0,
-        GiftVoucher: 0.0,
-        Collect_Point: "string",
-        PAYMODE: "string",
-        MODETYPE: "string",
-        ACCNAME: "string",
-        FYEAR: "25-26",
-        INSTNO: 1.0,
-        PREGOLDWT: 0.0,
-        CLOUD_UPLOAD: true,
-        CASH: 1000.0,
-        CARD: 0.0,
-        UPI: 0.0,
-        ONLINE: 0.0,
-        CHEQUE: 0.0,
-        AREA: "NELLORE",
-        SchemeENDDate: "1900-01-01T00:00:00",
-        APP_USERID: "venugopal",
-      },
-    ];
-    const count = data.length;
-    const totalAmount = data.reduce(
-      (sum: number, item: any) => sum + (item.RecAmount || 0),
-      0
-    );
-
-    // Take the first record as a base, add Count & TotalAmount
-    const updatedData = {
-      ...data[0],
-      Count: count,
-      TotalAmount: totalAmount.toFixed(2),
-    };
-
-    // Store only a single merged object for this card
-    setPaidAmountData((prev) => [...prev, updatedData]);
-  };
 
   const paymentReceiptAPI = async (card: number) => {
     try {
@@ -226,58 +109,123 @@ const PaidAmount = () => {
       </ScrollView> */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
         >
           {paidAmountData.length > 0 ? (
             <ScrollView contentContainerStyle={{ padding: 10 }}>
               {paidAmountData.map((item, index) => (
-                <View key={index} style={styles.schemeBox}>
-                  <Text style={styles.cnoText1}>
-                    CNO :{" "}
-                    <Text style={styles.cnoText}>{item?.CardNo || 0}</Text>
-                  </Text>
-                  <View style={styles.line} />
+                // <View key={index} style={styles.schemeBox}>
+                //   <Text style={styles.cnoText1}>
+                //     CNO :{" "}
+                //     <Text style={styles.cnoText}>{item?.CardNo || 0}</Text>
+                //   </Text>
+                //   <View style={styles.line} />
 
-                  <View style={styles.row}>
-                    <Text style={styles.label}>SchemeGroup</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>{item?.SchemeGroup || "-"}</Text>
-                  </View>
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>SchemeGroup</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>{item?.SchemeGroup || "-"}</Text>
+                //   </View>
 
-                  <View style={styles.row}>
-                    <Text style={styles.label}>SchemeName</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>{item?.SchemeName || "-"}</Text>
-                  </View>
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>SchemeName</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>{item?.SchemeName || "-"}</Text>
+                //   </View>
 
-                  <View style={styles.row}>
-                    <Text style={styles.label}>SchemeAmount</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>
-                      {item?.SchemeAmount ? item.SchemeAmount.toFixed(2) : "-"}
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>SchemeAmount</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>
+                //       {item?.SchemeAmount ? item.SchemeAmount.toFixed(2) : "-"}
+                //     </Text>
+                //   </View>
+
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>SchemeDuration</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>
+                //       {item?.SchemeDuration || "-"}
+                //     </Text>
+                //   </View>
+                //   <View style={styles.line} />
+
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>Pay Months</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>{item?.Count || "-"}</Text>
+                //   </View>
+                //   <View style={styles.row}>
+                //     <Text style={styles.label}>Paid Amount</Text>
+                //     <Text style={styles.colon}>:</Text>
+                //     <Text style={styles.value}>{item?.TotalAmount || "-"}</Text>
+                //   </View>
+                // </View>
+                <Card style={styles.card}>
+                  {/* Header */}
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardHeaderLeft}>
+                      {index + 1}. {item?.SchemeGroup}
                     </Text>
+                    <Text style={styles.cardHeaderRight}>{item?.CardNo}</Text>
                   </View>
 
-                  <View style={styles.row}>
-                    <Text style={styles.label}>SchemeDuration</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>
-                      {item?.SchemeDuration || "-"}
-                    </Text>
+                  {/* Body */}
+                  <View style={styles.cardBody}>
+                    {[
+                      { label: "Amount", value: `₹${item?.SchemeAmount}` },
+                      {
+                        label: "Duration",
+                        value: `${item?.SchemeDuration} months`,
+                      },
+                      {
+                        label: "Pay Months",
+                        value: `${item?.Count}`,
+                      },
+                      {
+                        label: "Paid Amount",
+                        value: `₹${item?.TotalAmount}`,
+                      },
+                    ].map((row, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          row?.label == "Paid Amount"
+                            ? styles.paidAmount
+                            : styles.row,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            row?.label == "Paid Amount"
+                              ? styles.paidAmountLabel
+                              : styles.label,
+                          ]}
+                        >
+                          {row.label}
+                        </Text>
+                        <Text
+                          style={[
+                            row?.label == "Paid Amount"
+                              ? styles.paidAmountColon
+                              : styles.colon,
+                          ]}
+                        >
+                          :
+                        </Text>
+                        <Text
+                          style={[
+                            row?.label == `Paid Amount`
+                              ? styles.paidAmountValue
+                              : styles.value,
+                          ]}
+                        >
+                          {row.value}
+                        </Text>
+                      </View>
+                    ))}
                   </View>
-                  <View style={styles.line} />
-
-                  <View style={styles.row}>
-                    <Text style={styles.label}>Pay Months</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>{item?.Count || "-"}</Text>
-                  </View>
-                  <View style={styles.row}>
-                    <Text style={styles.label}>Paid Amount</Text>
-                    <Text style={styles.colon}>:</Text>
-                    <Text style={styles.value}>{item?.TotalAmount || "-"}</Text>
-                  </View>
-                </View>
+                </Card>
               ))}
             </ScrollView>
           ) : (
@@ -311,29 +259,61 @@ const styles = StyleSheet.create({
     paddingBottom: 80, // ensures scroll area above footer
   },
 
+  // card: {
+  //   backgroundColor: "#154D71",
+  //   borderRadius: 12,
+  //   paddingVertical: 25,
+  //   paddingHorizontal: 20,
+  //   marginVertical: 5,
+  //   shadowColor: "#000",
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.25,
+  //   shadowRadius: 3.84,
+  //   elevation: 5, // Android shadow
+  // },
+
+  // cardTitle: {
+  //   fontSize: 16,
+  //   fontFamily: "serif",
+  //   marginBottom: 15,
+  // },
+
+  // cardSubtitle: {
+  //   color: "#fff",
+  //   fontSize: 14,
+  //   marginTop: 10,
+  // },
   card: {
-    backgroundColor: "#154D71",
-    borderRadius: 12,
-    paddingVertical: 25,
-    paddingHorizontal: 20,
-    marginVertical: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // Android shadow
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    // marginHorizontal: 12,
+    marginVertical: 8,
+    elevation: 4,
+    overflow: "hidden",
   },
-
-  cardTitle: {
-    fontSize: 16,
-    fontFamily: "serif",
-    marginBottom: 15,
+  cardHeader: {
+    backgroundColor: "#6FC1A7",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
-
-  cardSubtitle: {
+  cardHeaderLeft: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  cardHeaderRight: {
     color: "#fff",
     fontSize: 14,
-    marginTop: 10,
+    backgroundColor: "#703c04ff",
+    padding: 7,
+    borderRadius: 50,
+    fontWeight: "bold",
+  },
+  cardBody: {
+    paddingHorizontal: 50,
+    paddingVertical: 10,
   },
   schemeBox: {
     borderWidth: 2,
@@ -372,10 +352,28 @@ const styles = StyleSheet.create({
     marginVertical: 3,
   },
 
+  paidAmount: {
+    backgroundColor: "#157b88ff",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 15,
+    paddingVertical: 5,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    alignSelf: "center",
+  },
+
   label: {
     width: 130,
     fontSize: 15,
     fontFamily: "serif",
+  },
+
+  paidAmountLabel: {
+    width: 100,
+    fontSize: 15,
+    fontFamily: "serif",
+    color: "#fff",
   },
 
   colon: {
@@ -383,11 +381,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "serif",
   },
+  paidAmountColon: {
+    width: 10,
+    fontSize: 15,
+    fontFamily: "serif",
+    color: "#fff",
+  },
 
   value: {
     fontSize: 15,
     fontFamily: "serif",
     flexShrink: 1,
+  },
+  paidAmountValue: {
+    fontSize: 15,
+    fontFamily: "serif",
+    flexShrink: 1,
+    color: "#fff",
   },
   noDataContainer: {
     flex: 1,

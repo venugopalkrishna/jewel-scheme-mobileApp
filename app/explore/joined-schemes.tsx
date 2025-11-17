@@ -2,7 +2,7 @@ import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import dayjs from "dayjs";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -15,29 +15,53 @@ import {
 } from "react-native";
 import { Card } from "react-native-paper";
 
-const ClosedAccounts = () => {
-  const router = useRouter();
-  const [schemeTypeData, setSchemeData] = useState<any[]>([]);
-  const [closedAccounts, setClosedAccountsData] = useState<any[]>([]);
-  console.log(closedAccounts, "closedAccounts");
+const JoinedSchemes = () => {
+  const [schemeMemberData, setSchemeMemberData] = useState<any>([]);
+  const [paidAmountData, setPaidAmountData] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchTenantAndData = async () => {
-      try {
-        const storedTenant = await AsyncStorage.getItem("tenantName");
-        if (storedTenant) {
-          const res = await axios.get(
-            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithOrder?tableName=SCHEME_TYPE&order=SNO`,
-            { headers: { tenantName: storedTenant } }
+  console.log(schemeMemberData, "paidAmountData");
+
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const paymentReceiptAPI = async (card: number) => {
+    try {
+      const userName = await AsyncStorage.getItem("userName");
+      const storedTenant = await AsyncStorage.getItem("tenantName");
+
+      if (storedTenant) {
+        const res = await axios.get(
+          `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=RECEIPT_MAST&where=APP_USERID='${userName}' AND CARDNO='${card}'`,
+          { headers: { tenantName: storedTenant } }
+        );
+
+        const data = res.data || [];
+
+        if (data.length > 0) {
+          // Calculate count and total RecAmount
+          const count = data.length;
+          const totalAmount = data.reduce(
+            (sum: number, item: any) => sum + (item.RecAmount || 0),
+            0
           );
-          // setSchemeData(res.data || []);
+
+          // Take the first record as a base, add Count & TotalAmount
+          const updatedData = {
+            ...data[0],
+            Count: count,
+            TotalAmount: totalAmount.toFixed(2),
+          };
+
+          // Store only a single merged object for this card
+          setPaidAmountData((prev: any) => [...prev, updatedData]);
+        } else {
+          console.log("No receipt data found for Card:", card);
         }
-      } catch (err) {
-        console.log("Error fetching data:", err);
       }
-    };
-    fetchTenantAndData();
-  }, []);
+    } catch (err) {
+      console.log("Error fetching RECEIPT_MAST:", err);
+    }
+  };
 
   useEffect(() => {
     const schemeMemberAPI = async () => {
@@ -50,7 +74,11 @@ const ClosedAccounts = () => {
             { headers: { tenantName: storedTenant } }
           );
           const memberData = res.data;
-          setClosedAccountsData(memberData);
+          for (const item of memberData) {
+            if (item.CNO) {
+              await paymentReceiptAPI(item.CNO);
+            }
+          }
         }
       } catch (err) {
         console.log("Error fetching data:", err);
@@ -60,51 +88,58 @@ const ClosedAccounts = () => {
     // receiptData();
   }, []);
 
+  useEffect(() => {
+    const fetchTenantAndData = async () => {
+      try {
+        const userName = await AsyncStorage.getItem("userName");
+        const storedTenant = await AsyncStorage.getItem("tenantName");
+        if (storedTenant) {
+          const res = await axios.get(
+            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
+            { headers: { tenantName: storedTenant } }
+          );
+          setSchemeMemberData(res.data || []);
+        }
+      } catch (err) {
+        console.log("Error fetching data:", err);
+      }
+    };
+    fetchTenantAndData();
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
         source={require("../../assets/images/splash-icon.png")}
         style={styles.container}
       >
-        {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
-        {Array.isArray(schemeTypeData) &&
-          schemeTypeData.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.card}
-              onPress={() => {
-                router.push({
-                  pathname:
-                    `/explore/new-purchase-plans/schemeName/[sno]` as any,
-                  params: { ...item },
-                });
-              }}
-            >
-              <GradientText text={item?.SchemeType} style={styles.cardTitle} />
-              <Text style={styles.cardSubtitle}>{item?.SchemeMode}</Text>
-            </TouchableOpacity>
-          ))}
-      </ScrollView> */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {closedAccounts.length > 0 ? (
-            <ScrollView contentContainerStyle={{ padding: 10 }}>
-              {closedAccounts
-                ?.filter((item) => item?.SchemeEnding === true)
-                ?.map((item: any, index: any) => (
-                  <Card style={styles.card} key={index}>
+          <Text
+            style={{
+              color: "#154D71",
+              textAlign: "center",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
+            {/* {schemeName?.[0]?.SchemeType ?? "My Schemes"} */}
+          </Text>
+          {schemeMemberData?.length > 0
+            ? schemeMemberData
+                .filter((item: any) => item.SchemeGroup === params?.SchemeGroup) // <-- filter here
+
+                .map((item: any, index: any) => (
+                  <Card key={item.id} style={styles.card}>
                     {/* Header */}
                     <View style={styles.cardHeader}>
                       <Text style={styles.cardHeaderLeft}>
-                        {index + 1}. {item?.SchemeGroup}
-                        {/* {1}. {"1000"} */}
+                        {index + 1}. {item.SchemeGroup}
                       </Text>
-                      {/* <Text style={styles.cardHeaderRight}>{"item?.SchemeMode"}</Text> */}
-                      <Text style={styles.cardHeaderRight}>
-                        {item?.SchemeName}
-                      </Text>
+
+                      <Text style={styles.cardHeaderRight}>{item?.CardNo}</Text>
                     </View>
 
                     {/* Body */}
@@ -112,15 +147,18 @@ const ClosedAccounts = () => {
                       {[
                         {
                           label: "Join Date",
-                          value: `${dayjs(item.SchemeJoinDate)?.format(
+                          value: `${dayjs(item?.SchemeJoinDate)?.format(
                             "DD/MM/YYYY"
                           )}`,
                         },
                         {
-                          label: "Total Dues",
+                          label: "Scheme Name",
+                          value: `${item?.SchemeName}`,
+                        },
+                        {
+                          label: "Duration",
                           value: `${item.SchemeDuration} months`,
                         },
-
                         {
                           label: "Due Amount",
                           value: `₹${item.SchemeAmount}`,
@@ -133,15 +171,15 @@ const ClosedAccounts = () => {
                         </View>
                       ))}
                     </View>
+
+                    {/* Button */}
                   </Card>
-                ))}
-            </ScrollView>
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No Data Available</Text>
-            </View>
-          )}
+                ))
+            : null}
         </ScrollView>
+        {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
+          
+        </ScrollView> */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
           <Image
@@ -155,20 +193,26 @@ const ClosedAccounts = () => {
   );
 };
 
-export default ClosedAccounts;
+export default JoinedSchemes;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, paddingBottom: 30 },
   safeArea: {
     backgroundColor: "#fff",
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80, // ensures scroll area above footer
+    // paddingBottom: 80,
   },
-
+  headerText: {
+    color: "#154D71",
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
   card: {
-    backgroundColor: "#eef5f3ff",
+    backgroundColor: "#fff",
     borderRadius: 10,
     marginHorizontal: 12,
     marginVertical: 8,
@@ -189,7 +233,11 @@ const styles = StyleSheet.create({
   },
   cardHeaderRight: {
     color: "#fff",
-    fontSize: 13,
+    fontSize: 14,
+    backgroundColor: "#703c04ff",
+    padding: 7,
+    borderRadius: 50,
+    fontWeight: "bold",
   },
   cardBody: {
     paddingHorizontal: 50,
@@ -222,6 +270,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 14,
     textAlign: "right",
+  },
+  joinButton: {
+    backgroundColor: "#154D71",
+    alignSelf: "center",
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 28,
+    marginVertical: 10,
+  },
+  joinButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+    textAlign: "center",
   },
   noDataContainer: {
     flex: 1,

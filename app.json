@@ -40,6 +40,7 @@
       "backgroundColor": "#ffffff",
       "edgeToEdgeEnabled": true,
       "package": "com.timesera.timeserajewelscheme",
+      "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -60,6 +61,8 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
+      ["expo-notifications", {}],
       [
         "expo-splash-screen",
         {
