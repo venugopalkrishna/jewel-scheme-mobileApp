@@ -265,6 +265,7 @@
 import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -278,11 +279,11 @@ import {
   View,
 } from "react-native";
 import { Card } from "react-native-paper";
-
 const MyPlans = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [schemeMemberData, setSchemeMemberData] = useState<any>([]);
+  const version = Constants?.expoConfig?.version;
 
   const uniqueCategories = [
     ...new Map(
@@ -311,7 +312,7 @@ const MyPlans = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         <ScrollView
@@ -331,7 +332,7 @@ const MyPlans = () => {
           {uniqueCategories?.length > 0
             ? uniqueCategories?.map((item: any, index: number) => {
                 return (
-                  <Card style={styles.card}>
+                  <Card style={styles.card} key={index}>
                     {/* Header */}
                     <View style={styles.cardHeader}>
                       <Text style={styles.cardHeaderLeft}>
@@ -392,7 +393,7 @@ const MyPlans = () => {
           
         </ScrollView> */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
           <Image
             source={require("../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}

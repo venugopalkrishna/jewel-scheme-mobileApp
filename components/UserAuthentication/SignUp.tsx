@@ -13,13 +13,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Checkbox } from "react-native-paper";
 
 const SignUp = () => {
   const router = useRouter();
   const { setIsLoggedIn } = useAuth();
 
   const [form, setForm] = useState({
+    fullName: "", // username
     lastName: "", // username
     phone: "",
     email: "",
@@ -28,11 +28,15 @@ const SignUp = () => {
   });
   const [errors, setErrors] = useState({
     lastName: "",
+    fullName: "",
     phone: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [checkEmail, setCheckEmail] = useState<any>();
+  const [checkMobile, setCheckMobile] = useState<any>();
+  const [checkUserName, setCheckUserName] = useState<any>();
 
   const [checked, setChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -81,6 +85,7 @@ const SignUp = () => {
     let valid = true;
     let newErrors = {
       lastName: "",
+      fullName: "",
       phone: "",
       email: "",
       password: "",
@@ -92,10 +97,17 @@ const SignUp = () => {
       valid = false;
     } else if (checkUser === true) {
       newErrors.lastName = "Username already exists.";
+      valid = false;
     }
-
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name  is required.";
+      valid = false;
+    }
     if (!/^\d{10}$/.test(form.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number.";
+      valid = false;
+    } else if (checkMobile?.length > 0) {
+      newErrors.phone = "Phone Number is already exist";
       valid = false;
     }
 
@@ -105,6 +117,8 @@ const SignUp = () => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address.";
       valid = false;
+    } else if (checkEmail?.length > 0) {
+      newErrors.email = "Email already exists";
     }
 
     if (!form.password) {
@@ -127,8 +141,69 @@ const SignUp = () => {
     return valid;
   };
 
+  const checkMobileNo = async (value: any) => {
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_LOGINS&where=MOBILENO='${
+          value ? value : ""
+        }'`,
+        {
+          headers: {
+            tenantName: "gWWcFY+vylo8+VGsn/VemFh5B9b64KFKUjwRZGL3e/E=",
+          },
+        }
+      );
+      const data = await response?.data;
+      setCheckMobile(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const checkUniqueUser = async (value: any) => {
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_LOGINS&where=USERNAME='${
+          value ? value : ""
+        }'`,
+        {
+          headers: {
+            tenantName: "gWWcFY+vylo8+VGsn/VemFh5B9b64KFKUjwRZGL3e/E=",
+          },
+        }
+      );
+      const data = response?.data;
+      setCheckUserName(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  // const checkEmailID = async (value: any) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_LOGINS&where=EMAILID='${
+  //         value ? value : ""
+  //       }'`,
+  //       {
+  //         headers: {
+  //           tenantName: "gWWcFY+vylo8+VGsn/VemFh5B9b64KFKUjwRZGL3e/E=",
+  //         },
+  //       }
+  //     );
+  //     const data = await response?.data;
+  //     setCheckEmail(data);
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+  console.log(checkEmail, "email");
+  console.log(checkUserName, "username");
+  console.log(checkMobile, "mobile");
+
   const signUp = async () => {
     if (!validateForm()) return;
+    // checkUniqueUser(form.);
+    // await checkEmailID(form.email ? form.email : "");
 
     try {
       const payload = {
@@ -139,7 +214,17 @@ const SignUp = () => {
         dbName: "APP_ORIGIN_JST",
         clientName: "BALA GANESH",
         emailid: form?.email,
+        dob: "",
+        doa: "",
+        addresS1: "",
+        addresS2: "",
+        pincode: "",
+        state: "",
+        cityname: "",
+        profileimage: "",
+        fullname: form.fullName,
       };
+      console.log(payload, "payload");
 
       const response = await axios.post(
         `${CREATE_JEWEL}/api/Tenant/SchemeUserRegistration`,
@@ -155,6 +240,7 @@ const SignUp = () => {
       if (response?.data) {
         setForm({
           lastName: "",
+          fullName: "",
           phone: "",
           email: "",
           password: "",
@@ -168,24 +254,41 @@ const SignUp = () => {
   };
 
   const handleChange = (key: string, value: string) => {
+    checkMobileNo(value);
     setForm({ ...form, [key]: value });
     setErrors({ ...errors, [key]: "" }); // clear error on change
   };
 
+  // useEffect(() => {
+  //   checkMobileNo();
+  //   checkUniqueUser();
+  //   checkEmailID();
+  // }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.backButtonWrapper}>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.backbuttonInsidewrapper}
           onPress={() => router.push("/(drawer)/login")}
         >
           <Text style={styles.backButton}>Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <Text style={styles.creatAccount}>CREATE A NEW ACCOUNT</Text>
 
       {/* Username */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Your Full Name"
+        placeholderTextColor={"#154D71"}
+        value={form.fullName}
+        onChangeText={(value) => handleChange("fullName", value)}
+      />
+      {errors.lastName ? (
+        <Text style={styles.error}>{errors.fullName}</Text>
+      ) : null}
       <TextInput
         style={styles.input}
         placeholder="User Name"
@@ -271,7 +374,7 @@ const SignUp = () => {
       ) : null}
 
       {/* Terms Checkbox */}
-      <TouchableOpacity style={styles.row} onPress={() => setChecked(!checked)}>
+      {/* <TouchableOpacity style={styles.row} onPress={() => setChecked(!checked)}>
         <Checkbox
           status={checked ? "checked" : "unchecked"}
           color="#154D71"
@@ -280,7 +383,7 @@ const SignUp = () => {
         <Text style={styles.termsandConditions}>
           By Registering, you agree to all terms and conditions
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Signup Button */}
       <TouchableOpacity style={styles.singupcontainer} onPress={signUp}>

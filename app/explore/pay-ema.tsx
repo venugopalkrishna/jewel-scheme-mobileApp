@@ -1,186 +1,516 @@
 import { CREATE_JEWEL } from "@/api";
+import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
 import {
+  CFDropCheckoutPayment,
+  CFEnvironment,
+  CFPaymentComponentBuilder,
+  CFPaymentModes,
+  CFSession,
+  CFThemeBuilder,
+} from "cashfree-pg-api-contract";
+import dayjs from "dayjs";
+
+import Constants from "expo-constants";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Alert,
   Image,
   ImageBackground,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
-
+import { CFPaymentGatewayService } from "react-native-cashfree-pg-sdk";
+import { ActivityIndicator, Card } from "react-native-paper";
+// import { CFPaymentGatewayService } from "react-native-cashfree-pg-sdk";
 const PayEma = () => {
   const router = useRouter();
-  const [schemeDetData, setSchemeDetData] = useState<any[]>([]);
-  console.log(schemeDetData);
+  const [schemeDetData, setSchemeDetData] = useState<any>([]);
+  const [payableCard, setPayableCard] = useState<any>();
+  const [cardItem, setCardItem] = useState<any>();
+  const [payInstallment, setInstallment] = useState<any>();
 
-  // const schemeMemberDet = async (card: number) => {
-  //   try {
-  //     const userName = await AsyncStorage.getItem("userName");
-  //     const storedTenant = await AsyncStorage.getItem("tenantName");
-  //     if (storedTenant) {
-  //       const res = await axios.get(
-  //         `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=MEMBER_CARD_DET&where=APP_USERID='${userName}' AND CARDNO='${card}' AND PSTATUS='false'`,
-  //         { headers: { tenantName: storedTenant } }
-  //       );
+  const version = Constants?.expoConfig?.version;
+  const [expanded, setExpanded] = React.useState(false);
+  // const params = useLocalSearchParams();
+  const [cardNo, setCardNo] = useState<any>();
+  const [receiptNo, setReceiptNo] = useState<any>();
+  const [profileData, setProfileData] = useState<any>();
+  const [loading, setLoading] = useState(false);
+  const [schemeData, setSchemeData] = useState<any>();
+  const [expandedCard, setExpandedCard] = useState(null);
+  const [loadingIndex, setLoadingIndex] = useState(Number);
+  const cardItemRef = useRef(null);
+  const payInstallmentRef = useRef(null);
 
-  //       const data = res.data || [];
-  //       const today = new Date();
-  //       const next30Days = new Date();
-  //       next30Days.setDate(today.getDate() + 30);
+  const addRecieptNo = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
+        { headers: { tenantName: storedTenant } }
+      );
+      const data: number = response?.data[0]?.Column1 || 0;
+      setReceiptNo(data);
+      console.log("add receipt");
 
-  //       // Filter objects where MONTH is within 30 days from today
-  //       const filteredData = data.filter((item: any) => {
-  //         if (!item.MONTH) return false;
+      return data;
+    } catch (err) {
+      console.log(err);
+      return 0;
+    }
+  };
 
-  //         const itemDate = new Date(item.MONTH); // assuming MONTH is a date string
-  //         return itemDate >= today && itemDate <= next30Days;
-  //       });
+  const getProfile = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    const userName = await AsyncStorage.getItem("userName");
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Tenant/GetSchemeUserDetails?userName=${userName}
+  `,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      const data: any = await response?.data[0];
+      setProfileData(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const addRecieptMast = async (
+    card: any,
+    receipt: number,
+    installment: any
+  ) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const payload = {
+      recNo: receipt + 1,
+      recDate: new Date().toISOString(),
+      rectime: new Date().toISOString(),
+      empCode: "",
+      schemeGroup: card?.SchemeGroup || "",
+      schemeName: card?.SchemeName || "",
+      goldRate: 0,
+      cardNo: String(card?.CardNo), // ✅ Convert to string
+      phno: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      schemeMember: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      add1: profileData?.ADDRESS1 ? profileData?.ADDRESS1 : "",
+      add2: profileData?.ADDRESS2 ? profileData?.ADDRESS2 : "",
+      add3: profileData?.add3 || "",
+      schemeAmount: card?.SchemeAmount || 0,
+      schemeDuration: card?.SchemeDuration || 0,
+      bonusAmount: card?.BonusAmount || 0,
+      amount: card?.SchemeAmount || 0,
+      recAmount: card?.SchemeAmount || 0,
+      goldWt: 0,
+      schemeValue: card?.SchemeValue || 0,
+      schemeJDate: card?.SchemeJoinDate || new Date().toISOString(),
+      schemeENDDate: card?.SchemeEndDate || new Date().toISOString(),
+      incharger: "App",
+      narr: "-",
+      uname: profileData?.LOGINUSER ? profileData?.LOGINUSER : "",
+      schemeType: card?.SchemeType || "",
+      fyear: "25-26",
+      instno: installment?.sno,
+      pregoldwt: 0,
+      cash: card?.SchemeAmount || 0,
+      card: 0,
+      upi: 0,
+      online: 0,
+      cheque: 0,
+      area: profileData?.CITYNAME ? profileData?.CITYNAME : "",
+      clouD_UPLOAD: true,
 
-  //       // Append matching data to existing state
-  //       setSchemeDetData((prevData) => [...prevData, ...filteredData]);
+      // Optional fields
+      mode: "CASH",
+      accno: "string",
+      chequeno: "string",
+      schemeMode: "string",
+      sbMonths: 0,
+      giftVoucher: 0,
+      collect_Point: "string",
+      paymode: "string",
+      modetype: "string",
+      accname: "string",
+      apP_USERID: userName,
+    };
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    try {
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/Master/ReceiptMastInsert`,
+        payload,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      console.log("add receipt mast");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-  //       console.log("Filtered Data for Card:", card, filteredData);
-  //     }
-  //   } catch (err) {
-  //     console.log("Error fetching MEMBER_CARD_DET:", err);
-  //   }
-  // };
-
-  const schemeMemberDetAPI = () => {
-    const pastData = [
+  const addRecieptPayment = async (
+    card: any,
+    receipt: number,
+    installment: any
+  ) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const tablePayloads = [
+      // tableData.map((record, index) => (
       {
-        ADD1: "123",
-        ADD2: "456",
-        ADD3: "789",
-        ADD4: "1",
-        APP_USERID: "madhubabu",
-        AREA: "NELLORE",
-        CARDNO: "1",
-        MONTH: "2025-09-28",
-        PSTATUS: false,
-        RECDATE: null,
-        RECNO: null,
-        SCHEMEAMOUNT: 1000,
-        SCHEMEDURATION: 10,
-        SCHEMEENDDATE: "1900-01-01T00:00:00",
-        SCHEMEGROUP: "1000 SCHEME",
-        SCHEMEJOINDATE: "2025-10-28T07:11:55.247",
-        SCHEMEMEMBER: "TIMESRA",
-        SCHEMENAME: "1000 SCHEME",
-        SCHEMETYPE: "LAKSHMI KATAKSHAM GOLD SCHEME",
-        sno: 2,
-      },
-      {
-        ADD1: "123",
-        ADD2: "456",
-        ADD3: "789",
-        ADD4: "1",
-        APP_USERID: "madhubabu",
-        AREA: "NELLORE",
-        CARDNO: "1",
-        MONTH: "2025-10-28",
-        PSTATUS: false,
-        RECDATE: null,
-        RECNO: null,
-        SCHEMEAMOUNT: 1000,
-        SCHEMEDURATION: 10,
-        SCHEMEENDDATE: "1900-01-01T00:00:00",
-        SCHEMEGROUP: "1000 SCHEME",
-        SCHEMEJOINDATE: "2025-10-28T07:11:55.247",
-        SCHEMEMEMBER: "TIMESRA",
-        SCHEMENAME: "1000 SCHEME",
-        SCHEMETYPE: "LAKSHMI KATAKSHAM GOLD SCHEME",
-        sno: 2,
-      },
-      {
-        ADD1: "123",
-        ADD2: "456",
-        ADD3: "789",
-        ADD4: "1",
-        APP_USERID: "madhubabu",
-        AREA: "NELLORE",
-        CARDNO: "1",
-        MONTH: "2025-11-28",
-        PSTATUS: false,
-        RECDATE: null,
-        RECNO: null,
-        SCHEMEAMOUNT: 1000,
-        SCHEMEDURATION: 10,
-        SCHEMEENDDATE: "1900-01-01T00:00:00",
-        SCHEMEGROUP: "1000 SCHEME",
-        SCHEMEJOINDATE: "2025-10-28T07:11:55.247",
-        SCHEMEMEMBER: "TIMESRA",
-        SCHEMENAME: "1000 SCHEME",
-        SCHEMETYPE: "LAKSHMI KATAKSHAM GOLD SCHEME",
-        sno: 2,
+        recno: receipt + 1,
+        recdate: new Date().toISOString(),
+        scmgroup: card?.SchemeGroup || "string",
+        scmname: card?.SchemeName || "string",
+        scmmember: profileData?.FULLNAME || "string",
+        cardno: String(card?.CardNo),
+        sno: installment?.sno,
+        paymode: "CASH",
+        accno: "1234",
+        descr: "string",
+        particulars: "string",
+        amt: Number(card?.SchemeAmount) || 0,
+        recamt: Number(card?.SchemeAmount),
+        fyear: "25-26",
+        clouD_UPLOAD: true,
+        apP_USERID: userName,
       },
     ];
-    const data = pastData || [];
-    const today = new Date();
-    const next30Days = new Date();
-    next30Days.setDate(today.getDate() + 30);
+    // ));
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    try {
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/Master/ReceiptPaymentInsert`,
+        tablePayloads,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      console.log("receipt payment");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const addMemberDetails = async (
+    card: any,
+    receipt: number,
+    installment: any
+  ) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const memberCardPayload = {
+      recNo: receipt + 1,
+      recDate: dayjs(new Date()).format("MM/DD/YYY"),
+      pStatus: true,
+      cardNO: Number(card?.CardNo),
+      sno: installment?.sno, // Use installmentNo as sno
+    };
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    try {
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/Scheme/UpdateMemberCardDetails`,
+        memberCardPayload,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      console.log("member details");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  console.log(dayjs(new Date()).format("MM/DD/YYYY"), "date");
 
-    const normalizeDate = (date: Date) =>
-      new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const addMember = async (card: any, receipt: number, installment: any) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const payload = {
+      // schemeGroup: card?.SchemeGroup ? card?.SchemeGroup : "",
+      // schemeName: card?.SchemeName ? card?.SchemeName : "",
+      // schemeMember: profileData?.SCHEMEMEMBER ? profileData?.SCHEMEMEMBER : "",
+      // add1: profileData?.add1 ? profileData?.add1 : "",
+      // add2: profileData?.add2 ? profileData?.add2 : "",
+      // add3: profileData?.add3 ? profileData?.add3 : "",
+      // add4: profileData?.add4 ? profileData?.add4 : "",
+      // area: profileData?.area ? profileData?.area : "",
+      // pincode: profileData?.pincode ? profileData?.pincode : "",
+      // email: profileData?.email ? profileData?.email : "",
+      // phone: profileData?.phone ? profileData?.phone : "",
+      // schemeAmount: card?.SchemeAmount ? card?.SchemeAmount : 0,
+      // schemeDuration: card?.SchemeDuration ? card?.SchemeDuration : 0,
+      // bonusAmount: card?.BonusAmount ? card?.BonusAmount : 0,
+      // schemeValue: card?.SchemeValue ? card?.SchemeValue : 0,
+      // recentPaidDate: new Date().toISOString(),
+      // schemeEnding: false,
+      // schemeDropping: false,
+      // dropping_Cause: "",
+      // schemeBDAmt: 0,
+      // schemeMode: "CASH",
+      // bonusMonth: 0,
+      // giftVoucher: 0,
+      // schemeType: card?.SchemeType ? card?.SchemeType : "",
+      // gender: profileData?.gender ? profileData?.gender : "",
+      // state: profileData?.state ? profileData?.state : "",
+      // district: profileData?.district ? profileData?.district : "",
+      // mobile1: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      // mobile2: profileData?.mobile2 ? profileData?.mobile2 : "",
+      // fax: profileData?.fax ? profileData?.fax : "",
+      // dob: profileData?.DOB ? profileData?.DOB : "",
+      // annversary: profileData?.DOA ? profileData?.DOA : "",
+      // schemeJoinDate: card?.SchemeJoinDate
+      //   ? card?.SchemeJoinDate
+      //   : new Date().toISOString(),
+      // webSite: profileData?.webSite ? profileData?.webSite : "",
+      // entryDate: new Date().toISOString(),
+      // entryTime: new Date().toISOString(),
+      // uName: profileData?.SchemeMember ? profileData?.SchemeMember : "",
+      // schemeEndDate: card?.SchemeEndDate
+      //   ? card?.SchemeEndDate
+      //   : new Date().toISOString(),
+      // billNo: 0,
+      // billDate: new Date().toISOString(),
+      // jewelType: "",
+      // saleCode: "",
+      // giftVocher_Status: false,
+      // giftVocher_BillNo: 0,
+      // giftVocher_BillDate: new Date().toISOString(),
+      // giftVocher_JewelType: "",
+      // giftVocher_SaleCode: 0,
+      // nominee: profileData?.nominee ? profileData?.nominee : "",
+      // nmobileno: profileData?.nmobileno ? profileData?.nmobileno : "",
+      // empname: "App",
+      // commamt: 0,
+      // collecT_POINT: "",
+      // incharge: "",
+      // schemecompletion: false,
+      // cno: Number(card?.CardNo) || 0,
+      // duemonths: 0,
+      // cloud_upload: true,
+      InstallNo: installment?.sno, // ✅ newly added
+      recNo: receipt + 1 || 0,
+      recDate: dayjs(new Date()).format("MM/DD/YYY"),
+      recAmt: card?.SchemeAmount || 0,
+      cardNO: Number(card?.CardNo),
+      // statecode: profileData?.statecode ? profileData?.statecode : "",
+      // station: profileData?.station ? profileData?.station : "",
+      // apP_USERID: userName || "",
+    };
+    try {
+      const storedTenant = await AsyncStorage.getItem("tenantName");
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/Scheme/UpdateSchemeMemberInstallment`,
+        payload,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      console.log("add member");
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    const todayNormalized = normalizeDate(today);
-    const next30DaysNormalized = normalizeDate(next30Days);
+  const theme = new CFThemeBuilder()
+    .setNavigationBarBackgroundColor("#FF4B2B")
+    .setNavigationBarTextColor("#FFFFFF")
+    .setButtonBackgroundColor("#FFC107")
+    .setButtonTextColor("#FFFFFF")
+    .setPrimaryTextColor("#212121")
+    .setSecondaryTextColor("#757575")
+    .build();
 
-    const filteredData = data.filter((item: any) => {
-      if (!item.MONTH) return false;
+  const paymentStatusVerification = async (
+    orderId: any,
+    cardItem: any,
+    payInstallment: any
+  ) => {
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`
+      );
+      const data = await response?.data;
+      if (data?.status === "PAID") {
+        const receipt = await addRecieptNo();
 
-      const itemDate = new Date(item.MONTH);
-      const itemNormalized = normalizeDate(itemDate);
+        await addMember(cardItem, receipt, payInstallment);
+        await addRecieptMast(cardItem, receipt, payInstallment);
+        await addMemberDetails(cardItem, receipt, payInstallment);
+        await addRecieptPayment(cardItem, receipt, payInstallment);
+        router.push({
+          pathname: `/explore/success`,
+        });
+      } else {
+        router.push(`/explore/failed`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-      return itemNormalized <= next30DaysNormalized;
+  const handlePaymentCallbacks = useCallback(() => {
+    CFPaymentGatewayService.setCallback({
+      async onVerify(orderID) {
+        try {
+          await paymentStatusVerification(
+            orderID,
+            cardItemRef.current,
+            payInstallmentRef.current
+          );
+
+          // Alert.alert("Payment Success", `Order ID: ${orderID}`);
+          // Alert.alert(
+          //   "Success",
+          //   "All payment-related data saved successfully."
+          // );
+        } catch (error) {
+          router.push(`/explore/failed`);
+          // console.error("Error in payment callback:", error);
+          // Alert.alert(
+          //   "Error",
+          //   "Something went wrong while saving payment data."
+          // );
+          // const cleanUrl = window.location.origin + "/";
+          // window.history.replaceState({}, document.title, cleanUrl);
+        }
+      },
+
+      onError(error, orderID) {
+        paymentStatusVerification(
+          orderID,
+          cardItemRef.current,
+          payInstallmentRef.current
+        );
+
+        setLoading(false);
+        router.push(`/explore/failed`);
+        // console.error("Payment Error:", error);
+        // Alert.alert(
+        //   "Payment Failed",
+        //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
+        // );
+      },
     });
 
-    setSchemeDetData((prev) => [...prev, ...filteredData]);
+    // cleanup function on unmount
+    return () => {
+      CFPaymentGatewayService.removeCallback();
+    };
+  }, []);
+
+  const startPayment = async (data: any) => {
+    try {
+      const session = new CFSession(
+        data?.paymentSessionId,
+        data?.orderId,
+        CFEnvironment.SANDBOX
+      );
+
+      const components = new CFPaymentComponentBuilder()
+        .add(CFPaymentModes.CARD)
+        .add(CFPaymentModes.UPI)
+        .add(CFPaymentModes.WALLET)
+        .add(CFPaymentModes.PAYPAL)
+        .add(CFPaymentModes.NB)
+        .add(CFPaymentModes.EMI)
+        .add(CFPaymentModes.PAY_LATER)
+        .build();
+
+      const dropCheckoutPayment = new CFDropCheckoutPayment(
+        session,
+        components,
+        theme
+      );
+      CFPaymentGatewayService.doPayment(dropCheckoutPayment);
+    } catch (error: any) {
+      console.error("Payment initiation error:", error.message);
+      Alert.alert("Error", error.message || "Failed to initiate payment.");
+    }
   };
+
+  useEffect(() => {
+    handlePaymentCallbacks();
+  }, [handlePaymentCallbacks]);
+
+  const cashfreePaymentAPI = async (card: any, installment: any) => {
+    const userName = await AsyncStorage.getItem("userName");
+    const payBody = {
+      customerName: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      email: profileData?.EMAILID ? profileData?.EMAILID : "",
+      phone: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      amountRupees: card?.SchemeAmount,
+      userId: userName,
+      cardNo: String(card?.CardNo),
+      schemeGroup: card?.SchemeGroup,
+      schemeName: card?.SchemeName,
+      installmentno: installment?.sno,
+    };
+    try {
+      const storedTenant = await AsyncStorage.getItem("tenantName");
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
+        payBody,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        }
+      );
+      const data = response.data;
+      if (data) {
+        startPayment(data);
+        console.log("start payment");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleCreateApi = async (card: any, installment: any) => {
+    try {
+      console.log("create api");
+
+      // const card = await addCardNo();
+    } catch (err) {
+      console.log("Error in processing:", err);
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, []);
+
   const schemeMemberDet = async (card: number) => {
+    setSchemeDetData([]);
     try {
       const userName = await AsyncStorage.getItem("userName");
       const storedTenant = await AsyncStorage.getItem("tenantName");
       if (storedTenant) {
         const res = await axios.get(
-          `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=MEMBER_CARD_DET&where=APP_USERID='${userName}' AND CARDNO='${card}' AND PSTATUS='false'`,
+          `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=MEMBER_CARD_DET&where=APP_USERID='${userName}' AND CARDNO='${card}'&order=sno `,
           { headers: { tenantName: storedTenant } }
         );
 
         const data = res.data || [];
-        // const today = new Date();
-        // const next30Days = new Date();
-        // next30Days.setDate(today.getDate() + 30);
+        setSchemeDetData(data);
 
-        // // Normalize dates (remove time zone differences)
-        // const normalizeDate = (date: Date) =>
-        //   new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-        // const todayNormalized = normalizeDate(today);
-        // const next30DaysNormalized = normalizeDate(next30Days);
-
-        // const filteredData = data.filter((item: any) => {
-        //   if (!item.MONTH) return false;
-
-        //   const itemDate = new Date(item.MONTH);
-        //   const itemNormalized = normalizeDate(itemDate);
-
-        //   // Include only if date is today or within next 30 days
-        //   return (
-        //     itemNormalized >= todayNormalized &&
-        //     itemNormalized <= next30DaysNormalized
-        //   );
-        // });
         const today = new Date();
         const next30Days = new Date();
         next30Days.setDate(today.getDate() + 30);
-
         // Normalize dates (remove time zone/time differences)
         const normalizeDate = (date: Date) =>
           new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -197,36 +527,71 @@ const PayEma = () => {
           return itemNormalized <= next30DaysNormalized;
         });
 
-        setSchemeDetData((prev) => [...prev, ...filteredData]);
-
-        console.log("Filtered Data for Card:", card, filteredData);
+        // setSchemeDetData((prev: any) => [...prev, ...filteredData]);
       }
     } catch (err) {
       console.log("Error fetching MEMBER_CARD_DET:", err);
     }
   };
 
-  useEffect(() => {
-    const schemeMemberAPI = async () => {
-      try {
-        const userName = await AsyncStorage.getItem("userName");
-        const storedTenant = await AsyncStorage.getItem("tenantName");
-        if (storedTenant) {
-          const res = await axios.get(
-            `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
-            { headers: { tenantName: storedTenant } }
-          );
-          const memberData = res.data;
-          for (const item of memberData) {
-            if (item.CNO) {
-              await schemeMemberDet(item.CNO);
-            }
-          }
-        }
-      } catch (err) {
-        console.log("Error fetching data:", err);
+  const schemeMemberAPI = async () => {
+    try {
+      const userName = await AsyncStorage.getItem("userName");
+      const storedTenant = await AsyncStorage.getItem("tenantName");
+      if (storedTenant) {
+        const res = await axios.get(
+          `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
+          { headers: { tenantName: storedTenant } }
+        );
+        const memberData = res.data;
+        setSchemeData(memberData);
       }
-    };
+    } catch (err) {
+      console.log("Error fetching data:", err);
+    }
+  };
+
+  const toggleExpand = (index: any) => {
+    setExpandedCard((prev: any) => (prev === index ? null : index));
+  };
+
+  const getEmiStatus = (dueDateString: string) => {
+    if (!dueDateString) return { text: "Invalid Date", type: "invalid" };
+
+    let due;
+
+    // CASE 1: API returns "DD/MM/YYYY"
+    if (dueDateString.includes("/")) {
+      const [day, month, year] = dueDateString.split("/");
+      due = new Date(`${year}-${month}-${day}`);
+    }
+    // CASE 2: API returns "YYYY-MM-DD"
+    else {
+      due = new Date(dueDateString);
+    }
+
+    if (isNaN(due.getTime())) {
+      return { text: "Invalid Date", type: "invalid" };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor(
+      (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays > 0) {
+      return { text: `(${diffDays} days left)`, type: "future" };
+    } else if (diffDays === 0) {
+      return { text: "Due Today", type: "today" };
+    } else {
+      return { text: `Overdue by ${Math.abs(diffDays)} days`, type: "overdue" };
+    }
+  };
+
+  useEffect(() => {
     schemeMemberAPI();
     // schemeMemberDetAPI();
   }, []);
@@ -234,135 +599,235 @@ const PayEma = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {schemeDetData.length > 0 ? (
-            <ScrollView contentContainerStyle={{ padding: 10 }}>
-              {(() => {
-                const today = new Date();
-                const firstActiveIndex = schemeDetData.findIndex((item) => {
-                  const monthDate = new Date(item.MONTH);
-                  return monthDate <= today;
-                });
-
-                return schemeDetData.map((item, index) => {
-                  const monthDate = new Date(item.MONTH);
-                  const diffTime = monthDate.getTime() - today.getTime();
-                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                  let daysText = "";
-                  if (isNaN(diffDays)) {
-                    daysText = "-";
-                  } else if (diffDays > 0) {
-                    daysText = `${diffDays} day${
-                      diffDays > 1 ? "s" : ""
-                    } to go`;
-                  } else if (diffDays === 0) {
-                    daysText = "Today";
-                  } else {
-                    daysText = `${Math.abs(diffDays)} day${
-                      Math.abs(diffDays) > 1 ? "s" : ""
-                    } ago`;
-                  }
-
-                  const isPayActive = index === firstActiveIndex;
-
-                  return (
-                    <View key={index} style={styles.schemeBox}>
-                      <Text style={styles.cnoText1}>
-                        CNO :{" "}
-                        <Text style={styles.cnoText}>{item?.CARDNO || 0}</Text>
+          {schemeData?.length > 0 ? (
+            schemeData?.map((item: any, index: number) => {
+              return (
+                <Pressable
+                  key={index}
+                  onPress={() => {
+                    toggleExpand(index);
+                    schemeMemberDet(item?.CardNo);
+                    console.log(item?.CardNo, "card no");
+                  }}
+                >
+                  <Card style={styles.card}>
+                    {/* Header */}
+                    <View style={styles.cardHeader}>
+                      <Text style={styles.cardHeaderLeft}>
+                        {index + 1}. {item?.SchemeName}
                       </Text>
-                      <View style={styles.line} />
+                      <Text style={styles.cardHeaderRight}>Gold Scheme</Text>
+                    </View>
 
-                      <View style={styles.row}>
-                        <Text style={styles.label}>SchemeGroup</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text style={styles.value}>
-                          {item?.SCHEMEGROUP || "-"}
-                        </Text>
-                      </View>
-
-                      <View style={styles.row}>
-                        <Text style={styles.label}>SchemeName</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text style={styles.value}>
-                          {item?.SCHEMENAME || "-"}
-                        </Text>
-                      </View>
-
-                      <View style={styles.row}>
-                        <Text style={styles.label}>SchemeAmount</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text style={styles.value}>
-                          {item?.SCHEMEAMOUNT
-                            ? item.SCHEMEAMOUNT.toFixed(2)
-                            : "-"}
-                        </Text>
-                      </View>
-
-                      <View style={styles.row}>
-                        <Text style={styles.label}>SchemeDuration</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text style={styles.value}>
-                          {item?.SCHEMEDURATION || "-"}
-                        </Text>
-                      </View>
-
-                      <View style={styles.row}>
-                        <Text style={styles.label}>Pay Date</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text style={styles.value}>
-                          {item?.MONTH
-                            ? new Date(item.MONTH)
-                                .toLocaleDateString("en-GB")
-                                .replace(/\//g, "-")
-                            : "-"}
-                        </Text>
-                      </View>
-
-                      <View style={styles.row}>
-                        <Text style={styles.label}>Day Status</Text>
-                        <Text style={styles.colon}>:</Text>
-                        <Text
-                          style={[
-                            styles.value,
-                            { color: diffDays < 0 ? "red" : "green" },
-                          ]}
+                    {/* Body Placeholder */}
+                    <View style={styles.cardBody}>
+                      {/* <Text
+                          style={{
+                            textAlign: "center",
+                            color: "red",
+                            fontWeight: "500",
+                          }}
                         >
-                          {daysText}
-                        </Text>
-                      </View>
+                          Show EMI
+                        </Text> */}
+                      {/* <AntDesign
+                          name="down"
+                          size={24}
+                          color="grey"
+                          style={{ textAlign: "center" }}
+                        /> */}
+                      {expandedCard === index ? (
+                        <AntDesign
+                          name="up"
+                          size={24}
+                          color="grey"
+                          style={{
+                            textAlign: "center",
+                            padding: 10,
+                            borderRadius: 50,
+                          }}
+                        />
+                      ) : (
+                        <AntDesign
+                          name="down"
+                          size={24}
+                          color="grey"
+                          style={{ textAlign: "center" }}
+                        />
+                      )}
+                    </View>
 
-                      <TouchableOpacity
-                        style={[
-                          styles.payButton,
-                          { backgroundColor: isPayActive ? "#28a745" : "#aaa" },
-                        ]}
-                        disabled={!isPayActive}
-                        onPress={() => {
-                          if (isPayActive) {
-                            console.log(
-                              "Proceed to pay for card:",
-                              item.CARDNO
+                    {/* ---------------- EXPANDED SECTION ---------------- */}
+                    {expandedCard === index && (
+                      <View style={styles.expandSection}>
+                        {schemeDetData?.map(
+                          (dataitem: any, dataindex: number) => {
+                            const emiStatus = getEmiStatus(dataitem?.MONTH);
+                            return (
+                              <View key={dataindex} style={styles.emiRow}>
+                                {/* If paid */}
+                                {dataitem?.PSTATUS === true ? (
+                                  <View>
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>
+                                        Scheme Join Date
+                                      </Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text style={styles.value}>
+                                        {dayjs(
+                                          dataitem?.SCHEMEJOINDATE
+                                        )?.format("DD/MM/YYYY")}
+                                      </Text>
+                                    </View>
+                                    {/* Month */}
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>Due Date</Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text style={styles.value}>
+                                        {dayjs(dataitem?.MONTH).format(
+                                          "DD/MM/YYYY"
+                                        )}
+                                      </Text>
+                                    </View>
+
+                                    {/* EMI Status */}
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>
+                                        Payment Status
+                                      </Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text
+                                        style={{
+                                          color: "green",
+                                          fontWeight: "600",
+                                        }}
+                                      >
+                                        Paid
+                                      </Text>
+                                    </View>
+                                  </View>
+                                ) : (
+                                  <>
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>
+                                        Scheme Join Date
+                                      </Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text style={styles.value}>
+                                        {dayjs(
+                                          dataitem?.SCHEMEJOINDATE
+                                        )?.format("DD/MM/YYYY")}
+                                      </Text>
+                                    </View>
+                                    {/* Month */}
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>Due Date</Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text style={styles.value}>
+                                        {dayjs(dataitem?.MONTH).format(
+                                          "DD/MM/YYYY"
+                                        )}
+                                      </Text>
+                                    </View>
+
+                                    {/* EMI Status */}
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>Next EMI</Text>
+                                      <Text style={styles.colon}>:</Text>
+
+                                      <Text
+                                        style={[
+                                          styles.value,
+                                          emiStatus.type === "future" && {
+                                            color: "#777",
+                                          },
+                                          emiStatus.type === "today" && {
+                                            color: "#ff9900",
+                                          },
+                                          emiStatus.type === "overdue" && {
+                                            color: "red",
+                                          },
+                                        ]}
+                                      >
+                                        {emiStatus?.text}
+                                      </Text>
+                                    </View>
+                                    <View style={styles.detailRow}>
+                                      <Text style={styles.label}>
+                                        Payment Status
+                                      </Text>
+                                      <Text style={styles.colon}>:</Text>
+                                      <Text
+                                        style={{
+                                          color: "red",
+                                          fontWeight: "500",
+                                        }}
+                                      >
+                                        Not yet done
+                                      </Text>
+                                    </View>
+
+                                    {/* PAY EMI BUTTON only if due or overdue */}
+                                    {(emiStatus.type === "today" ||
+                                      emiStatus.type === "overdue") && (
+                                      <Pressable
+                                        disabled={loading}
+                                        style={styles.payButton}
+                                        onPress={() => {
+                                          // setLoading(true);
+                                          setCardItem(item);
+                                          setInstallment(dataitem);
+                                          cardItemRef.current = item;
+                                          payInstallmentRef.current = dataitem;
+                                          // setLoadingIndex(dataindex);
+                                          console.log(dataitem, "data item");
+                                          console.log(item, "item");
+                                          cashfreePaymentAPI(item, dataitem);
+
+                                          // handleCreateApi(item, dataitem);
+                                          // if (result.success) {
+                                          //   handlePaymentCallbacks(); // call ONLY after API success
+                                          // }
+                                        }}
+                                      >
+                                        {loadingIndex === dataindex ? (
+                                          <ActivityIndicator
+                                            animating={true}
+                                            color={"#fff"}
+                                          />
+                                        ) : (
+                                          <Text style={styles.payButtonText}>
+                                            Pay EMI
+                                          </Text>
+                                        )}
+                                      </Pressable>
+                                    )}
+
+                                    {/* Not Yet Due */}
+                                    {emiStatus.type === "future" && (
+                                      <Text style={styles.notDueText}>
+                                        Not Yet Due
+                                      </Text>
+                                    )}
+                                  </>
+                                )}
+                              </View>
                             );
                           }
-                        }}
-                      >
-                        <Text style={styles.payButtonText}>
-                          {isPayActive ? "Pay Now" : "Not Yet Due"}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                });
-              })()}
-            </ScrollView>
+                        )}
+                      </View>
+                    )}
+                  </Card>
+                </Pressable>
+              );
+            })
           ) : (
             <View style={styles.noDataContainer}>
               <Text style={styles.noDataText}>No Data Available</Text>
@@ -371,7 +836,7 @@ const PayEma = () => {
         </ScrollView>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
           <Image
             source={require("../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}
@@ -395,94 +860,112 @@ const styles = StyleSheet.create({
     paddingBottom: 80, // ensures scroll area above footer
   },
 
-  // card: {
-  //   backgroundColor: "#154D71",
-  //   borderRadius: 12,
-  //   paddingVertical: 25,
-  //   paddingHorizontal: 20,
-  //   marginVertical: 5,
-  //   shadowColor: "#000",
-  //   shadowOffset: { width: 0, height: 2 },
-  //   shadowOpacity: 0.25,
-  //   shadowRadius: 3.84,
-  //   elevation: 5, // Android shadow
-  // },
-
-  // cardTitle: {
-  //   fontSize: 16,
-  //   fontFamily: "serif",
-  //   marginBottom: 15,
-  // },
-
-  // cardSubtitle: {
-  //   color: "#fff",
-  //   fontSize: 14,
-  //   marginTop: 10,
-  // },
-  schemeBox: {
-    borderWidth: 2,
-    borderColor: "#000",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+  card: {
+    marginVertical: 10,
+    padding: 12,
+    borderRadius: 10,
+    // backgroundColor: "#6FC1A7",
+    backgroundColor: "#d2dcc0ff",
+    elevation: 2,
   },
 
-  cnoText: {
-    fontWeight: "bold",
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  cardHeaderLeft: {
     fontSize: 16,
-    textAlign: "center",
-    marginBottom: 6,
-    // textDecorationLine: "underline",
+    fontWeight: "700",
+    color: "#222",
   },
-  cnoText1: {
-    // fontWeight: "bold",
+  cardHeaderRight: {
     fontSize: 14,
-    textAlign: "center",
-    marginBottom: 6,
-    // textDecorationLine: "underline",
+    fontWeight: "600",
+    color: "#444",
   },
 
-  line: {
-    borderBottomWidth: 1,
-    borderColor: "#000",
-    marginBottom: 10,
+  cardBody: {
+    // paddingVertical: 4,
   },
 
-  row: {
+  expandSection: {
+    // marginTop: 10,
+    padding: 12,
+    // backgroundColor: "#F8F9FA",
+    backgroundColor: "#c8dfd8ff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    gap: 12,
+  },
+
+  emiRow: {
+    padding: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#DDD",
+  },
+
+  detailRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 3,
+    marginBottom: 6,
   },
 
   label: {
     width: 130,
-    fontSize: 15,
-    fontFamily: "serif",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
   },
-
   colon: {
-    width: 10,
-    fontSize: 15,
-    fontFamily: "serif",
+    marginHorizontal: 5,
+    fontSize: 14,
+    color: "#333",
+  },
+  value: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#111",
   },
 
-  value: {
+  paidText: {
     fontSize: 15,
-    fontFamily: "serif",
-    flexShrink: 1,
+    color: "green",
+    fontWeight: "700",
   },
+
+  notDueText: {
+    marginTop: 8,
+    color: "#777",
+    fontStyle: "italic",
+    fontWeight: "bold",
+  },
+
   payButton: {
-    marginTop: 10,
+    marginTop: 8,
+    // backgroundColor: "#0077FF",
+    backgroundColor: "#154D71",
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 6,
     alignItems: "center",
   },
   payButtonText: {
     color: "#fff",
+    fontSize: 14,
     fontWeight: "600",
-    fontSize: 16,
   },
+
+  // noDataContainer: {
+  //   padding: 20,
+  //   alignItems: "center",
+  // },
+  // noDataText: {
+  //   fontSize: 16,
+  //   color: "#999",
+  // },
   noDataContainer: {
     flex: 1,
     justifyContent: "center",

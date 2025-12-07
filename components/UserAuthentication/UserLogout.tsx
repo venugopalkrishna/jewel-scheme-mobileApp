@@ -1,0 +1,145 @@
+import { useAuth } from "@/context/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+export default function UserLogoutDialogue({
+  showDialog,
+  onClose,
+  visible,
+}: any) {
+  const { logout, setIsLoggedIn } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const logOut = async () => {
+    try {
+      await AsyncStorage.removeItem("tenantName");
+      await AsyncStorage.removeItem("userName");
+      logout();
+      setIsLoggedIn(false);
+      router.replace("/");
+    } catch (error) {
+      console.log("Error during logout:", error);
+    }
+  };
+
+  //   const deleteAccount = async () => {
+  //     try {
+  //       const userName = await AsyncStorage.getItem("userName");
+
+  //       // Call your backend API endpoint
+  //       const res = await axios.post(
+  //         `${CREATE_JEWEL}/api/Tenant/DeleteSchemeUser?userName=${userName}`,
+  //         {}
+  //       );
+  //     } catch (error) {
+  //       console.error("Account deletion error:", error);
+  //       throw error;
+  //     }
+  //   };
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await logOut();
+      onClose();
+      Alert.alert("LoggedOut successfully.");
+      router.replace("/");
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to logout.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.dialogBox}>
+          <Text style={styles.title}>Logout Account</Text>
+          <Text style={styles.message}>Are you sure you want to logout?</Text>
+
+          <View style={styles.buttons}>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#ccc" }]}
+              disabled={loading}
+              onPress={onClose}
+            >
+              <Text style={[styles.buttonText, { color: "#000" }]}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "red" }]}
+              onPress={handleLogout}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Yes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dialogBox: {
+    width: "85%",
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  message: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+});

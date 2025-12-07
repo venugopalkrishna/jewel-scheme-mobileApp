@@ -1,4 +1,6 @@
+import FAQComponent from "@/components/DrawerScreens/FAQ";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -10,9 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const FAQ = () => {
   const router = useRouter();
+  const version = Constants?.expoConfig?.version;
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -27,9 +29,11 @@ const FAQ = () => {
           <Text style={styles.headerTitle}>FAQ</Text>
           <View style={{ width: 24 }} />
         </View>
+
+        <FAQComponent />
       </ScrollView>
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+        <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
         <Image
           source={require("../../assets/images/icon.png")} // replace with your logo
           style={styles.footerLogo}

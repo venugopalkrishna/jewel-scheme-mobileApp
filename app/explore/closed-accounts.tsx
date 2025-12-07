@@ -2,6 +2,7 @@ import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import dayjs from "dayjs";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,7 +20,11 @@ const ClosedAccounts = () => {
   const router = useRouter();
   const [schemeTypeData, setSchemeData] = useState<any[]>([]);
   const [closedAccounts, setClosedAccountsData] = useState<any[]>([]);
-  console.log(closedAccounts, "closedAccounts");
+  const version = Constants?.expoConfig?.version;
+
+  const NumberOfClosedAccounts = closedAccounts?.filter(
+    (item: any, index: any) => (item = item?.SchemeEnding) === true
+  );
 
   useEffect(() => {
     const fetchTenantAndData = async () => {
@@ -63,7 +68,7 @@ const ClosedAccounts = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
@@ -89,10 +94,10 @@ const ClosedAccounts = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {closedAccounts.length > 0 ? (
+          {NumberOfClosedAccounts.length > 0 ? (
             <ScrollView contentContainerStyle={{ padding: 10 }}>
-              {closedAccounts
-                ?.filter((item) => item?.SchemeEnding === true)
+              {NumberOfClosedAccounts
+                // ?.filter((item) => item?.SchemeEnding === true)
                 ?.map((item: any, index: any) => (
                   <Card style={styles.card} key={index}>
                     {/* Header */}
@@ -143,7 +148,7 @@ const ClosedAccounts = () => {
           )}
         </ScrollView>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
           <Image
             source={require("../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}

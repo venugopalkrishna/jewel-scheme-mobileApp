@@ -1,13 +1,14 @@
+import RateViewer from "@/components/DrawerScreens/RateHistory";
 import Login from "@/components/UserAuthentication/Login";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
   Image,
   ImageBackground,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,7 +18,7 @@ import {
 const RateHistoryPage = () => {
   const { login, isLogged, logout } = useAuth();
   const router = useRouter();
-  const rateHistory = [];
+  const version = Constants?.expoConfig?.version;
   return (
     <>
       {isLogged == true ? (
@@ -30,20 +31,16 @@ const RateHistoryPage = () => {
             <Text style={styles.headerTitle}>RATE HISTORY</Text>
             <View style={{ width: 24 }} />
           </View>
-          {rateHistory.length > 0 ? (
-            <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
-              {/* Render your data here */}
-            </ScrollView>
-          ) : (
-            <View style={styles.noDataContainer}>
-              <Text style={styles.noDataText}>No Data Available</Text>
-            </View>
-          )}
+          <RateViewer />
+
+          {/* <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>No Data Available</Text>
+          </View> */}
+          {/* )} */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+            <Text style={styles.footerText}>
+              © Timesera 2025 ( V-{version} )
+            </Text>
             <Image
               source={require("../../assets/images/icon.png")} // replace with your logo
               style={styles.footerLogo}

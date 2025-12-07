@@ -1,4 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import {
   Animated,
@@ -10,6 +12,10 @@ import {
 
 const Success = () => {
   const navigation = useNavigation();
+  const params = useLocalSearchParams();
+  const router = useRouter();
+  const userName = AsyncStorage.getItem("userName");
+
   // Animation Value
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
@@ -49,24 +55,32 @@ const Success = () => {
       </View>
 
       <View style={{ alignItems: "center", marginTop: 20 }}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Amount</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>25000</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>User Name</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>Vamsi</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>Transaction ID</Text>
-          <Text style={styles.colon}>:</Text>
-          <Text style={styles.value}>DKSH34u348uKU768</Text>
+        <View>
+          {/* <View style={styles.row}>
+            <Text style={styles.label}>Amount</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={styles.value}>
+              {params?.SchemeAmount ? params?.SchemeAmount : "25000"}
+            </Text>
+          </View> */}
+          {/* <View style={styles.row}>
+            <Text style={styles.label}>User Name</Text>
+            <Text style={styles.colon}>:</Text>
+            <Text style={styles.value}>{userName}</Text>
+          </View> */}
+          {/* <View style={styles.row}>
+              <Text style={styles.label}>Transaction ID</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>DKSH34u348uKU768</Text>
+            </View> */}
         </View>
       </View>
+
+      {/* <View style={{ marginTop: 10, width: "90%" }}>
+        <Text style={{ color: "red", fontWeight: "bold" }}>
+          Payments are currently in TEST MODE. No real charges will be made.
+        </Text>
+      </View> */}
 
       <View style={{ marginTop: 20, alignItems: "center" }}>
         <TouchableOpacity
@@ -77,7 +91,7 @@ const Success = () => {
             borderRadius: 10,
           }}
           onPress={() => {
-            // navigation logic here
+            router.replace("/");
           }}
         >
           <Text style={{ color: "#fff", fontSize: 16 }}>Go To Homepage</Text>

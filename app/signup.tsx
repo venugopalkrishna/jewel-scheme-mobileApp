@@ -5,7 +5,7 @@ import { ImageBackground, StyleSheet } from "react-native";
 const SingupPage = () => {
   return (
     <ImageBackground
-      source={require("../assets/images/splash-icon.png")}
+      source={require("../assets/images/backgroundImage2.jpg")}
       style={styles.container}
       resizeMode="cover"
     >

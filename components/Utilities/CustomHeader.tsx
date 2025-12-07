@@ -23,10 +23,8 @@ export default function CustomHeader() {
   const navigation = useNavigation();
   const route = useRoute();
 
-  console.log(route.name);
-
   const routeTitles: Record<string, string> = {
-    "pay-ema": "Pay Ema",
+    "pay-ema": "Pay EMI",
     "my-plans": "My Plans",
     "paid-amount": "Paid Amount",
     "total-weight": "Total Weight",
@@ -59,7 +57,7 @@ export default function CustomHeader() {
 
       {/* Logo */}
       <Image
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/icon.png")}
         style={styles.image}
       />
 
@@ -116,11 +114,11 @@ export default function CustomHeader() {
 }
 
 const commonCircleStyle = {
-  padding: 8,
+  padding: 4,
   backgroundColor: "#fff",
   color: "#1A2A80",
   borderRadius: 50,
-  borderColor: "#FFC900",
+  borderColor: "#065315ff",
   borderWidth: 2,
 };
 
@@ -129,7 +127,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 10,
     paddingHorizontal: 5,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -152,6 +150,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     resizeMode: "contain",
+    borderRadius: 50,
   },
   notificaton: { ...commonCircleStyle },
   menu: { ...commonCircleStyle },

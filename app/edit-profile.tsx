@@ -4,7 +4,7 @@ import { ImageBackground, StyleSheet } from "react-native";
 const EditProfilePage = () => {
   return (
     <ImageBackground
-      source={require("../../assets/images/splash-icon.png")}
+      source={require("../assets/images/backgroundImage2.jpg")}
       style={styles.container}
     >
       <EditProfile />

@@ -1,6 +1,7 @@
 import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,10 +14,10 @@ import {
   View,
 } from "react-native";
 import { Card } from "react-native-paper";
-
 const PaidAmount = () => {
   const router = useRouter();
   const [paidAmountData, setPaidAmountData] = useState<any[]>([]);
+  const version = Constants?.expoConfig?.version;
 
   const paymentReceiptAPI = async (card: number) => {
     try {
@@ -85,7 +86,7 @@ const PaidAmount = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         {/* <ScrollView contentContainerStyle={{ padding: 10 }}>
@@ -161,7 +162,7 @@ const PaidAmount = () => {
                 //     <Text style={styles.value}>{item?.TotalAmount || "-"}</Text>
                 //   </View>
                 // </View>
-                <Card style={styles.card}>
+                <Card style={styles.card} key={index}>
                   {/* Header */}
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardHeaderLeft}>
@@ -235,7 +236,7 @@ const PaidAmount = () => {
           )}
         </ScrollView>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
           <Image
             source={require("../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}

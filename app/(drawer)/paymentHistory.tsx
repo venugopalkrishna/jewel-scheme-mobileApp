@@ -1,3 +1,4 @@
+import PaymentHistory from "@/components/DrawerScreens/PaymentHistory";
 import Login from "@/components/UserAuthentication/Login";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,9 +15,12 @@ import {
   View,
 } from "react-native";
 
+import Constants from "expo-constants";
+
 const PaymentHistoryPage = () => {
   const { login, isLogged, logout } = useAuth();
   const router = useRouter();
+  const version = Constants?.expoConfig?.version;
 
   // Example mock data
   const paymentData = []; // <-- replace with your actual payment data
@@ -35,22 +39,25 @@ const PaymentHistoryPage = () => {
           </View>
 
           {/* Main content */}
-          {paymentData.length > 0 ? (
-            <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-            >
-              {/* Render your data here */}
-            </ScrollView>
-          ) : (
+          {/* {paymentData.length > 0 ? ( */}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Render your data here */}
+            <PaymentHistory />
+          </ScrollView>
+          {/* ) : (
             <View style={styles.noDataContainer}>
               <Text style={styles.noDataText}>No Data Available</Text>
             </View>
-          )}
+          )} */}
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+            <Text style={styles.footerText}>
+              © Timesera 2025 ( V-{version})
+            </Text>
             <Image
               source={require("../../assets/images/icon.png")}
               style={styles.footerLogo}
@@ -74,11 +81,11 @@ export default PaymentHistoryPage;
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f1f0e5ff",
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80, // space above footer
+    paddingBottom: 5, // space above footer
   },
   header: {
     flexDirection: "row",
@@ -88,6 +95,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    backgroundColor: "#fff",
   },
   headerTitle: {
     fontSize: 18,

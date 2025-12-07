@@ -1,6 +1,7 @@
 import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -17,8 +18,10 @@ import { Card } from "react-native-paper";
 
 const SchemeName = () => {
   const [schemeName, setSchemeName] = useState<any>([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
+  const version = Constants?.expoConfig?.version;
 
   useEffect(() => {
     const fetchTenantAndData = async () => {
@@ -62,7 +65,7 @@ const SchemeName = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../../../assets/images/splash-icon.png")}
+        source={require("../../../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         <ScrollView
@@ -115,12 +118,13 @@ const SchemeName = () => {
                   {/* Join Button */}
                   <Pressable
                     style={styles.joinButton}
-                    onPress={() =>
+                    onPress={() => {
+                      // console.log(item, "item");
                       router.push({
                         pathname: `/explore/new-purchase-plans/join-purchase-plan`,
                         params: { ...item },
-                      })
-                    }
+                      });
+                    }}
                   >
                     <Text style={styles.joinButtonText}>Join</Text>
                   </Pressable>
@@ -134,7 +138,7 @@ const SchemeName = () => {
           )}
         </ScrollView>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
           <Image
             source={require("../../../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}
@@ -227,6 +231,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 28,
     marginVertical: 10,
+    // flexDirection: "row",
   },
   joinButtonText: {
     color: "#fff",

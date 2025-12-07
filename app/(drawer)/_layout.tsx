@@ -1,5 +1,6 @@
 import Header from "@/components/Homepages/Header";
 import AccountDeletionDialog from "@/components/UserAuthentication/AccountDeletion";
+import UserLogoutDialogue from "@/components/UserAuthentication/UserLogout";
 import { useAuth } from "@/context/AuthContext";
 import {
   AntDesign,
@@ -21,6 +22,7 @@ import { StyleSheet } from "react-native";
 export default function Layout() {
   const { login, isLogged } = useAuth();
   const [showDialog, setShowDialog] = useState(false);
+  const [showLogoutDialogue, setShowLogoutDialogue] = useState(false);
 
   return (
     <>
@@ -53,6 +55,15 @@ export default function Layout() {
             <DrawerItemList {...props} />
             {isLogged && (
               <DrawerItem
+                label="Logout"
+                icon={({ color }) => (
+                  <AntDesign name="logout" size={18} color={color} />
+                )}
+                onPress={() => setShowLogoutDialogue(true)} // 👈 open the dialog
+              />
+            )}
+            {isLogged && (
+              <DrawerItem
                 label="Account Deletion"
                 icon={({ color }) => (
                   <AntDesign name="delete" size={18} color="red" />
@@ -72,19 +83,19 @@ export default function Layout() {
             ),
           }}
         />
+        {/* {!isLogged ? ( */}
         <Drawer.Screen
           name="login"
           options={{
-            title: isLogged == false ? "Login/Signup" : "Logout",
+            title: "Login/Signup",
+            drawerItemStyle: { display: !isLogged ? "contents" : "none" },
+
             drawerIcon: ({ color, size }) => (
-              <AntDesign
-                name={isLogged == false ? "login" : "logout"}
-                size={18}
-                color={color}
-              />
+              <AntDesign name={"login"} size={18} color={color} />
             ),
           }}
         />
+        {/* ) : null} */}
 
         <Drawer.Screen
           name="paymentHistory"
@@ -118,6 +129,7 @@ export default function Layout() {
           name="offers" // 👈 maps to app/public/settings.tsx
           options={{
             title: "Offers",
+            drawerItemStyle: { display: "none" },
             drawerIcon: ({ focused, size, color }) => (
               <MaterialCommunityIcons
                 name="offer"
@@ -132,6 +144,7 @@ export default function Layout() {
           name="newArrivals" // 👈 maps to app/public/settings.tsx
           options={{
             title: "New Arrivals",
+            drawerItemStyle: { display: "none" },
             drawerIcon: ({ focused, size, color }) => (
               <Foundation
                 name="burst-new"
@@ -160,6 +173,7 @@ export default function Layout() {
           name="invite" // 👈 maps to app/public/settings.tsx
           options={{
             title: "Invite",
+            drawerItemStyle: { display: "none" },
             drawerIcon: ({ focused, size, color }) => (
               <AntDesign
                 name="shrink"
@@ -245,6 +259,10 @@ export default function Layout() {
       <AccountDeletionDialog
         visible={showDialog}
         onClose={() => setShowDialog(false)}
+      />
+      <UserLogoutDialogue
+        visible={showLogoutDialogue}
+        onClose={() => setShowLogoutDialogue(false)}
       />
     </>
   );

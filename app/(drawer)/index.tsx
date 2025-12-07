@@ -11,7 +11,6 @@ import "react-native-gesture-handler";
 // import AdvertisementCarousel from "@/components/Homepages/AdvertisementCarousel";
 // import Header from "@/components/Homepages/Header";
 import MenuGrid from "@/components/Homepages/MenuGrid";
-import NewArrivalsBanner from "@/components/Homepages/NewArrivalsBanner";
 import Offers from "@/components/Homepages/Offers";
 // import RateCard from "@/components/Homepages/RateCard";
 import AdvertisementCarousel from "@/components/Homepages/AdvertisementCarousel";
@@ -60,17 +59,17 @@ export default function HomeScreen() {
   //   };
 
   const openWhatsApp = () => {
-    const phoneNumber = "+919440353589"; // Replace with your business number
+    const phoneNumber = "+919949713019"; // Replace with your business number
     Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
   };
 
   const makePhoneCall = () => {
-    const phoneNumber = "tel:+919440353589"; // Replace with your number
+    const phoneNumber = "tel:+919949713019"; // Replace with your number
     Linking.openURL(phoneNumber);
   };
   return (
     <ImageBackground
-      source={require("../../assets/images/splash-icon.png")} // local image
+      source={require("../../assets/images/backgroundImage2.jpg")} // local image
       style={styles.background}
       resizeMode="cover"
     >
@@ -83,7 +82,7 @@ export default function HomeScreen() {
           <AdvertisementCarousel />
           <MenuGrid />
           <Offers />
-          <NewArrivalsBanner />
+          {/* <NewArrivalsBanner /> */}
         </ScrollView>
         <TouchableOpacity style={styles.callButton} onPress={makePhoneCall}>
           <Image

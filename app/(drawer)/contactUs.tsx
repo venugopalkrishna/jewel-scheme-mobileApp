@@ -1,4 +1,6 @@
+import ContactUsPage from "@/components/DrawerScreens/ContactUs";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -12,6 +14,7 @@ import {
 } from "react-native";
 
 const ContactUs = () => {
+  const appVesrion = Constants?.expoConfig?.version;
   const router = useRouter();
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -27,9 +30,10 @@ const ContactUs = () => {
           <Text style={styles.headerTitle}>CONTACT US</Text>
           <View style={{ width: 24 }} />
         </View>
+        <ContactUsPage />
       </ScrollView>
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+        <Text style={styles.footerText}>© Timesera 2025 ( V-{appVesrion})</Text>
         <Image
           source={require("../../assets/images/icon.png")} // replace with your logo
           style={styles.footerLogo}

@@ -1,4 +1,6 @@
+import AboutUs from "@/components/DrawerScreens/AboutUs";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -10,9 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const AboutUs = () => {
+const AboutUsPage = () => {
   const router = useRouter();
+  const version = Constants?.expoConfig?.version;
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -27,9 +29,10 @@ const AboutUs = () => {
           <Text style={styles.headerTitle}>ABOUT US</Text>
           <View style={{ width: 24 }} />
         </View>
+        <AboutUs />
       </ScrollView>
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+        <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
         <Image
           source={require("../../assets/images/icon.png")} // replace with your logo
           style={styles.footerLogo}
@@ -40,7 +43,7 @@ const AboutUs = () => {
   );
 };
 
-export default AboutUs;
+export default AboutUsPage;
 
 const styles = StyleSheet.create({
   safeArea: {

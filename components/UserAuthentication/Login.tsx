@@ -10,7 +10,7 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Avatar, Checkbox } from "react-native-paper";
+import { Avatar } from "react-native-paper";
 import { MobileInput, PasswordInput } from "../Utilities/InputFields";
 
 export default function Login() {
@@ -72,7 +72,7 @@ export default function Login() {
     <View style={styles.container}>
       {/* <MenuHeader /> */}
       {/* Back button at top-left */}
-      <View style={styles.backButtonWrapper}>
+      {/* <View style={styles.backButtonWrapper}>
         <TouchableOpacity
           style={styles.backbuttonInsidewrapper}
           onPress={() => {
@@ -81,7 +81,7 @@ export default function Login() {
         >
           <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Centered input fields + login button */}
       <View style={styles.inputFields}>
@@ -116,7 +116,7 @@ export default function Login() {
           <Text style={styles.errorText}>{errorMessage}</Text>
         ) : null}
         <View style={styles.row}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.row}
             onPress={() => {
               setChecked(!checked);
@@ -128,7 +128,7 @@ export default function Login() {
               uncheckedColor="#154D71"
             ></Checkbox>
             <Text style={styles.label}>Remember me</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           {/* <Text
             style={styles.forgot}
             onPress={() => {

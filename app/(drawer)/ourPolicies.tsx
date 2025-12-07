@@ -1,4 +1,6 @@
+import TermsAndPrivacyScreen from "@/components/DrawerScreens/TermsAndConditions";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -10,9 +12,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const OurPolicies = () => {
   const router = useRouter();
+  const version = Constants?.expoConfig?.version;
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -27,9 +29,12 @@ const OurPolicies = () => {
           <Text style={styles.headerTitle}>OUR POLICIES</Text>
           <View style={{ width: 24 }} />
         </View>
+        <View>
+          <TermsAndPrivacyScreen />
+        </View>
       </ScrollView>
       <View style={styles.footer}>
-        <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+        <Text style={styles.footerText}>© Timesera 2025 ( V-{version} )</Text>
         <Image
           source={require("../../assets/images/icon.png")} // replace with your logo
           style={styles.footerLogo}
@@ -44,7 +49,7 @@ export default OurPolicies;
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f7fbff",
     flex: 1,
   },
   scrollContent: {
@@ -58,6 +63,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    backgroundColor: "#fff",
   },
   headerTitle: {
     fontSize: 18,

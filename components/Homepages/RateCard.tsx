@@ -16,7 +16,8 @@ export default function RateCard({
           <Text style={styles.label}>Gold Rate/Gram</Text>
           <Text style={styles.value}>₹{goldRate}</Text>
         </View>
-        <Text style={styles.separator}>|</Text>
+        {/* <Text style={styles.separator}></Text> */}
+        {/* <AntDesign name="arrowright" size={34} color="#0a6022ff" /> */}
         {/* </View> */}
         <View style={styles.card}>
           <Text style={styles.label}>Silver Rate/Gram</Text>
@@ -34,33 +35,37 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
     marginBottom: 8,
-    color: "#143D60",
+    color: "#036f0cff",
+    // color: "#143D60",
   },
   cardRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    borderColor: "#cf9610ff",
-    borderWidth: 2,
+    // borderColor: "#cf9610ff",
+    // borderWidth: 2,
     // padding: 5,
     alignItems: "center",
-    marginLeft: 30,
-    marginRight: 30,
+    // marginLeft: 30,
+    // marginRight: 30,
     borderRadius: 10,
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
   },
   card: {
-    // backgroundColor: "#fff",
-    // padding: 12,
-    // borderRadius: 8,
-    // elevation: 3,
-    // // minWidth: "40%",
-    // alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    elevation: 3,
+    // minWidth: "40%",
+    alignItems: "center",
   },
   label: {
     fontSize: 12,
-    color: "#143D60",
+    // color: "#143D60",
+    color: "#036f0cff",
     textAlign: "center",
-    fontWeight: "500",
+    fontWeight: "bold",
+    borderBottomWidth: 2,
+    borderBottomColor: "#09783dff",
   },
   value: {
     fontSize: 16,
@@ -69,5 +74,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#880926ff",
   },
-  separator: { fontSize: 50, color: "#cf9610ff" },
+  separator: {
+    fontSize: 50,
+    color: "#031e77ff",
+    // marginLeft: 10,
+  },
 });

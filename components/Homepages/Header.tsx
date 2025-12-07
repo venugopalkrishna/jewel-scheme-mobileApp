@@ -24,7 +24,7 @@ export default function Header() {
 
   return (
     <LinearGradient
-      colors={["#003366", "#1961a9ff", "#051a2eff"]} // three colors
+      colors={["#2a7538ff", "#3c9957ff", "#15571bff"]} // three colors
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }} // horizontal gradient
       style={styles.header}
@@ -38,7 +38,7 @@ export default function Header() {
 
       {/* Logo */}
       <Image
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/icon.png")}
         style={styles.image}
       />
 
@@ -53,11 +53,12 @@ export default function Header() {
           }
         >
           <LinearGradient
-            colors={["#b6a024ff", "#b9a740ff", "#e3d37dff"]}
+            colors={[" #fff", "#fff", "#fff"]}
+            // colors={[" #b6a024ff", "#b9a740ff", "#e3d37dff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={[styles.title, { opacity: 0 }]}>TIMESERA</Text>
+            <Text style={[styles.title, { opacity: 1 }]}>TIMESERA</Text>
           </LinearGradient>
         </MaskedView>
 
@@ -70,7 +71,7 @@ export default function Header() {
           }
         >
           <LinearGradient
-            colors={["#ecdb7eff", "#fff7b2ff"]}
+            colors={["#d83b02ff", "#231d69ff"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
@@ -83,23 +84,23 @@ export default function Header() {
 
       {/* Notification Icon */}
       <TouchableOpacity>
-        <Ionicons
+        {/* <Ionicons
           name="notifications"
           size={24}
           color="#fff"
           style={styles.notificaton}
-        />
+        /> */}
       </TouchableOpacity>
     </LinearGradient>
   );
 }
 
 const commonCircleStyle = {
-  padding: 8,
+  padding: 4,
   backgroundColor: "#fff",
   color: "#1A2A80",
   borderRadius: 50,
-  borderColor: "#FFC900",
+  borderColor: "#065315ff",
   borderWidth: 2,
 };
 
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 10,
     paddingHorizontal: 5,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -116,7 +117,8 @@ const styles = StyleSheet.create({
   },
   center: { alignItems: "center" },
   title: {
-    color: "#ecdb7eff",
+    // color: "#ecdb7eff",
+    color: "#e0ddd9ff",
     fontSize: 16,
     fontWeight: "bold",
     fontFamily: "serif",
@@ -126,11 +128,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     padding: 5,
     fontFamily: "serif",
+    fontWeight: "bold",
   },
   image: {
     width: 60,
     height: 60,
     resizeMode: "contain",
+    borderRadius: 50,
   },
   notificaton: { ...commonCircleStyle },
   menu: { ...commonCircleStyle },

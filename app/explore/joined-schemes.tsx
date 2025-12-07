@@ -2,6 +2,7 @@ import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import dayjs from "dayjs";
+import Constants from "expo-constants";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -18,8 +19,7 @@ import { Card } from "react-native-paper";
 const JoinedSchemes = () => {
   const [schemeMemberData, setSchemeMemberData] = useState<any>([]);
   const [paidAmountData, setPaidAmountData] = useState<any[]>([]);
-
-  console.log(schemeMemberData, "paidAmountData");
+  const version = Constants?.expoConfig?.version;
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -110,7 +110,7 @@ const JoinedSchemes = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../assets/images/splash-icon.png")}
+        source={require("../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         <ScrollView
@@ -132,7 +132,7 @@ const JoinedSchemes = () => {
                 .filter((item: any) => item.SchemeGroup === params?.SchemeGroup) // <-- filter here
 
                 .map((item: any, index: any) => (
-                  <Card key={item.id} style={styles.card}>
+                  <Card key={index} style={styles.card}>
                     {/* Header */}
                     <View style={styles.cardHeader}>
                       <Text style={styles.cardHeaderLeft}>
@@ -181,7 +181,7 @@ const JoinedSchemes = () => {
           
         </ScrollView> */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version})</Text>
           <Image
             source={require("../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}

@@ -1,6 +1,8 @@
+import WriteToUs from "@/components/DrawerScreens/WriteToUs";
 import Login from "@/components/UserAuthentication/Login";
 import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
@@ -13,10 +15,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const WriteToUS = () => {
+const WriteToUSPage = () => {
   const { login, isLogged, logout } = useAuth();
   const router = useRouter();
+  const version = Constants?.expoConfig?.version;
   return (
     <>
       {isLogged == true ? (
@@ -33,9 +35,12 @@ const WriteToUS = () => {
               <Text style={styles.headerTitle}>FEEDBACK</Text>
               <View style={{ width: 24 }} />
             </View>
+            <WriteToUs />
           </ScrollView>
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+            <Text style={styles.footerText}>
+              © Timesera 2025 ( V-{version} )
+            </Text>
             <Image
               source={require("../../assets/images/icon.png")} // replace with your logo
               style={styles.footerLogo}
@@ -55,7 +60,7 @@ const WriteToUS = () => {
   );
 };
 
-export default WriteToUS;
+export default WriteToUSPage;
 
 const styles = StyleSheet.create({
   safeArea: {

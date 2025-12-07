@@ -34,37 +34,36 @@
 
 // app/_layout.tsx
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
-import registerNNPushToken from "native-notify";
 import { useEffect } from "react";
 import { ImageBackground, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
+import Toast from "react-native-toast-message";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const IsLoggedIn = useAuth();
   const segments = useSegments();
   const router = useRouter();
-  registerNNPushToken(32667, "buA6zsNTsskAZ8MllfVkM0");
+  // registerNNPushToken(32667, "buA6zsNTsskAZ8MllfVkM0");
 
-  useEffect(() => {
-    const registerForPushNotifications = async () => {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") return;
+  // useEffect(() => {
+  //   const registerForPushNotifications = async () => {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== "granted") return;
 
-      // ✅ Register device with Native Notify (your App ID & Token)
-      registerNNPushToken(32667, "buA6zsNTsskAZ8MllfVkM0");
-    };
+  //     // ✅ Register device with Native Notify (your App ID & Token)
+  //     registerNNPushToken(32667, "buA6zsNTsskAZ8MllfVkM0");
+  //   };
 
-    registerForPushNotifications();
-  }, []);
+  //   registerForPushNotifications();
+  // }, []);
 
   useEffect(() => {
     const inPublic =
@@ -89,6 +88,7 @@ export default function RootLayout() {
               resizeMode="cover"
             >
               <View style={styles.margintop}></View>
+              <Toast />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen
                   name="(drawer)"

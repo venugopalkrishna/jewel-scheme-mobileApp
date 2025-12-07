@@ -22,9 +22,10 @@ import {
   CFSession,
   CFThemeBuilder,
 } from "cashfree-pg-api-contract";
+import Constants from "expo-constants";
 import { CFPaymentGatewayService } from "react-native-cashfree-pg-sdk";
 import { ScrollView } from "react-native-gesture-handler";
-import { Card, List, RadioButton } from "react-native-paper";
+import { ActivityIndicator, Card } from "react-native-paper";
 
 const JoinPurchasePlan = () => {
   const router = useRouter();
@@ -33,8 +34,9 @@ const JoinPurchasePlan = () => {
   const [cardNo, setCardNo] = useState<any>();
   const [receiptNo, setReceiptNo] = useState<any>();
   const [profileData, setProfileData] = useState<any>();
-
-  const handlePress = () => setExpanded(!expanded);
+  const version = Constants?.expoConfig?.version;
+  const [loading, setLoading] = useState(false);
+  console.log(params, "params");
 
   const addCardNo = async () => {
     const storedTenant = await AsyncStorage.getItem("tenantName");
@@ -43,7 +45,7 @@ const JoinPurchasePlan = () => {
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=SCHEME_MEMBER&column=CNO`,
         { headers: { tenantName: storedTenant } }
       );
-      const data: number = response?.data[0]?.Column1 || 0;
+      const data: number = (await response?.data[0]?.Column1) || 0;
       setCardNo(data);
       return data; // return value for immediate use
     } catch (err) {
@@ -59,7 +61,7 @@ const JoinPurchasePlan = () => {
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
         { headers: { tenantName: storedTenant } }
       );
-      const data: number = response?.data[0]?.Column1 || 0;
+      const data: number = (await response?.data[0]?.Column1) || 0;
       setReceiptNo(data);
       return data;
     } catch (err) {
@@ -70,16 +72,18 @@ const JoinPurchasePlan = () => {
 
   const getProfile = async () => {
     const storedTenant = await AsyncStorage.getItem("tenantName");
+    const userName = await AsyncStorage.getItem("userName");
     try {
       const response = await axios.get(
-        `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=SCHEME_MEMBER_PROFILE&where=MOBILENO%3D%27999%27`,
+        `${CREATE_JEWEL}/api/Tenant/GetSchemeUserDetails?userName=${userName}
+`,
         {
           headers: {
             tenantName: storedTenant,
           },
         }
       );
-      const data: any = response?.data[0];
+      const data: any = await response?.data[0];
       setProfileData(data);
     } catch (err) {
       console.log(err);
@@ -91,38 +95,42 @@ const JoinPurchasePlan = () => {
       recNo: receipt + 1,
       recDate: new Date().toISOString(),
       rectime: new Date().toISOString(),
-      empCode: "string",
-      schemeGroup: params?.SchemeGroup || "string",
-      schemeName: params?.SchemeName || "string",
+      empCode: "",
+      schemeGroup: params?.SchemeGroup ? params?.SchemeGroup : "",
+      schemeName: params?.SchemeName ? params?.SchemeName : "",
       goldRate: 0,
       cardNo: String(card + 1), // ✅ Convert to string
-      phno: profileData?.MOBILENO || "string",
-      schemeMember: profileData?.SchemeMember || "string",
-      add1: profileData?.add1 || "string",
-      add2: profileData?.add2 || "string",
-      add3: profileData?.add3 || "string",
-      schemeAmount: params?.SchemeAmount || 0,
-      schemeDuration: params?.SchemeDuration || 0,
-      bonusAmount: params?.BonusAmount || 0,
-      amount: params?.SchemeAmount || 0,
-      recAmount: params?.SchemeAmount || 0,
+      phno: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      schemeMember: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      add1: profileData?.ADDRESS1 ? profileData?.LOGINUSER : "",
+      add2: profileData?.ADDRESS2 ? profileData?.ADDRESS2 : "",
+      add3: profileData?.add3 || "",
+      schemeAmount: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
+      schemeDuration: params?.SchemeDuration
+        ? Number(params?.SchemeDuration)
+        : 0,
+      bonusAmount: params?.BonusAmount ? Number(params?.BonusAmount) : 0,
+      amount: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
+      recAmount: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
       goldWt: 0,
-      schemeValue: params?.SchemeValue || 0,
-      schemeJDate: params?.SchemeJoinDate || new Date().toISOString(),
+      schemeValue: params?.SchemeValue ? Number(params?.SchemeValue) : 0,
+      schemeJDate: params?.SchemeJoinDate
+        ? params?.SchemeJoinDate
+        : new Date().toISOString(),
       schemeENDDate: params?.SchemeEndDate || new Date().toISOString(),
       incharger: "App",
       narr: "-",
-      uname: profileData?.SchemeMember || "string",
-      schemeType: params?.SchemeType || "string",
+      uname: profileData?.LOGINUSER ? profileData?.LOGINUSER : "",
+      schemeType: params?.SchemeType ? params?.SchemeType : "",
       fyear: "25-26",
       instno: 1,
       pregoldwt: 0,
-      cash: params?.SchemeAmount || 0,
+      cash: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
       card: 0,
       upi: 0,
       online: 0,
       cheque: 0,
-      area: profileData?.area || "",
+      area: profileData?.CITYNAME ? profileData?.CITYNAME : "",
       clouD_UPLOAD: true,
 
       // Optional fields
@@ -149,6 +157,7 @@ const JoinPurchasePlan = () => {
           },
         }
       );
+      console.log("add receipt mast");
     } catch (err) {
       console.log(err);
     }
@@ -157,13 +166,12 @@ const JoinPurchasePlan = () => {
   const addRecieptPayment = async (card: number, receipt: number) => {
     const userName = await AsyncStorage.getItem("userName");
     const tablePayloads = [
-      // tableData.map((record, index) => (
       {
         recno: receipt + 1,
         recdate: new Date().toISOString(),
-        scmgroup: params?.SchemeGroup || "string",
-        scmname: params?.SchemeName || "string",
-        scmmember: profileData?.SchemeMember || "string",
+        scmgroup: params?.SchemeGroup ? params?.SchemeGroup : "",
+        scmname: params?.SchemeName ? params?.SchemeName : "",
+        scmmember: profileData?.FULLNAME ? profileData?.FULLNAME : "",
         cardno: String(card + 1),
         sno: 1,
         paymode: "CASH",
@@ -189,6 +197,7 @@ const JoinPurchasePlan = () => {
           },
         }
       );
+      console.log("add receipt payment");
     } catch (err) {
       console.log(err);
     }
@@ -201,18 +210,20 @@ const JoinPurchasePlan = () => {
       recdate: new Date().toISOString(),
       pstatus: true,
       cardno: String(card + 1),
-      month: "string", // Use SchemeJoinDate for month
-      schemetype: params?.SchemeType || "string",
-      schemegroup: params?.SchemeGroup || "string",
-      schemename: params?.SchemeName || "string",
-      schememember: profileData?.SchemeMember || "string",
-      adD1: profileData?.add1 || "string",
-      adD2: profileData?.add2 || "string",
-      adD3: profileData?.add3 || "string",
-      adD4: profileData?.add4 || "string",
-      area: profileData?.area || "string",
-      schemeamount: params?.SchemeAmount || 0,
-      schemeduration: params?.SchemeDuration || 0,
+      month: new Date().toISOString(), // Use SchemeJoinDate for month
+      schemetype: params?.SchemeType ? params?.SchemeType : "",
+      schemegroup: params?.SchemeGroup ? params?.SchemeGroup : "",
+      schemename: params?.SchemeName ? params?.SchemeName : "",
+      schememember: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      adD1: profileData?.add1 ? profileData?.add1 : "",
+      adD2: profileData?.add2 ? profileData?.add2 : "",
+      adD3: profileData?.add3 ? profileData?.add3 : "",
+      adD4: profileData?.add4 ? profileData?.add4 : "",
+      area: profileData?.CITYNAME ? profileData?.CITYNAME : "",
+      schemeamount: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
+      schemeduration: params?.SchemeDuration
+        ? Number(params?.SchemeDuration)
+        : 0,
       schemejoindate: params?.SchemeJoinDate || new Date().toISOString(),
       schemeenddate: params?.SchemeEndDate || new Date().toISOString(),
       apP_USERID: userName,
@@ -229,79 +240,114 @@ const JoinPurchasePlan = () => {
           },
         }
       );
+      console.log("add Member details");
     } catch (err) {
       console.log(err);
     }
   };
 
+  const paymentStatusVerification = async (orderId: any) => {
+    setLoading(false);
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`
+      );
+      const data = await response?.data;
+      if (data?.status === "PAID") {
+        const card = await addCardNo();
+        const receipt = await addRecieptNo();
+
+        await addMember(card, receipt);
+        await addRecieptMast(card, receipt);
+        await addRecieptPayment(card, receipt);
+        await addMemberDetails(card, receipt);
+
+        router.push(`/explore/success`);
+      } else {
+        router.push(`/explore/failed`);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  console.log(profileData, "profiledata");
+
   const addMember = async (card: number, receipt: number) => {
     const userName = await AsyncStorage.getItem("userName");
     const payload = {
-      schemeGroup: params?.SchemeGroup || "string",
-      schemeName: params?.SchemeName || "string",
-      schemeMember: profileData?.SchemeMember || "string",
-      add1: profileData?.add1 || "string",
-      add2: profileData?.add2 || "string",
-      add3: profileData?.add3 || "string",
-      add4: profileData?.add4 || "string",
-      area: profileData?.area || "string",
-      pincode: profileData?.pincode || "string",
-      email: profileData?.email || "string",
-      phone: profileData?.phone || "string",
-      cardNo: String(card + 1) || "string",
-      schemeAmount: params?.SchemeAmount || 0,
-      schemeDuration: params?.SchemeDuration || 0,
-      bonusAmount: params?.BonusAmount || 0,
-      schemeValue: params?.SchemeValue || 0,
+      schemeGroup: params?.SchemeGroup ? params?.SchemeGroup : "",
+      schemeName: params?.SchemeName ? params?.SchemeName : "",
+      schemeMember: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      add1: profileData?.add1 ? profileData?.add1 : "",
+      add2: profileData?.add2 ? profileData?.add2 : "",
+      add3: profileData?.add3 ? profileData?.add3 : "",
+      add4: profileData?.add4 ? profileData?.add4 : "",
+      area: profileData?.CITYNAME ? profileData?.CITYNAME : "",
+      pincode: profileData?.PINCODE ? profileData?.PINCODE : "",
+      email: profileData?.EMAILID ? profileData?.EMAILID : "",
+      phone: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      cardNo: String(card + 1) || "",
+      schemeAmount: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
+      schemeDuration: params?.SchemeDuration
+        ? Number(params?.SchemeDuration)
+        : 0,
+      bonusAmount: params?.BonusAmount ? Number(params?.BonusAmount) : 0,
+      schemeValue: params?.SchemeValue ? Number(params?.SchemeValue) : 0,
       recentPaidDate: new Date().toISOString(),
       schemeEnding: false,
       schemeDropping: false,
-      dropping_Cause: "string",
+      dropping_Cause: "",
       schemeBDAmt: 0,
       schemeMode: "CASH",
       bonusMonth: 0,
       giftVoucher: 0,
-      schemeType: params?.SchemeType || "string",
-      gender: profileData?.gender || "string",
-      state: profileData?.state || "string",
-      district: profileData?.district || "string",
-      mobile1: profileData?.MOBILENO || "string",
-      mobile2: profileData?.mobile2 || "string",
-      fax: profileData?.fax || "string",
-      dob: profileData?.dob || new Date().toISOString(),
-      annversary: profileData?.annversary || new Date().toISOString(),
-      schemeJoinDate: params?.SchemeJoinDate || new Date().toISOString(),
-      webSite: profileData?.webSite || "string",
+      schemeType: params?.SchemeType ? params?.SchemeType : "",
+      gender: profileData?.gender ? profileData?.gender : "",
+      state: profileData?.STATE ? profileData?.STATE : "",
+      district: profileData?.CITYNAME ? profileData?.CITYNAME : "",
+      mobile1: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      mobile2: profileData?.mobile2 ? profileData?.mobile2 : "",
+      fax: profileData?.fax ? profileData?.fax : "",
+      // dob: profileData?.DOB ? profileData?.DOB : new Date().toISOString(),
+      dob: new Date().toISOString(),
+      annversary: new Date().toISOString(),
+      // annversary: profileData?.DOA ? profileData?.DOA : "",
+      schemeJoinDate: params?.SchemeJoinDate
+        ? params?.SchemeJoinDate
+        : new Date().toISOString(),
+      webSite: profileData?.webSite ? profileData?.webSite : "",
       entryDate: new Date().toISOString(),
       entryTime: new Date().toISOString(),
-      uName: profileData?.SchemeMember || "string",
-      schemeEndDate: params?.SchemeEndDate || new Date().toISOString(),
+      uName: profileData?.LOGINUSER ? profileData?.LOGINUSER : "",
+      schemeEndDate: params?.SchemeEndDate
+        ? params?.SchemeEndDate
+        : new Date().toISOString(),
       billNo: 0,
       billDate: new Date().toISOString(),
-      jewelType: "string",
-      saleCode: "string",
+      jewelType: "",
+      saleCode: "",
       giftVocher_Status: false,
       giftVocher_BillNo: 0,
       giftVocher_BillDate: new Date().toISOString(),
-      giftVocher_JewelType: "string",
+      giftVocher_JewelType: "",
       giftVocher_SaleCode: 0,
-      nominee: profileData?.nominee || "string",
-      nmobileno: profileData?.nmobileno || "string",
+      nominee: profileData?.nominee ? profileData?.nominee : "",
+      nmobileno: profileData?.nmobileno ? profileData?.nmobileno : "",
       empname: "App",
       commamt: 0,
       recno: receipt + 1 || 0,
       recdate: new Date().toISOString(),
       recamt: params?.SchemeAmount || 0,
-      collecT_POINT: "string",
-      incharge: "string",
+      collecT_POINT: "",
+      incharge: "",
       schemecompletion: false,
       duemonths: 0,
       cno: Number(card + 1) || 0,
       cloud_upload: true,
-      installno: 0, // ✅ newly added
-      statecode: profileData?.statecode || "string",
-      station: profileData?.station || "string",
-      apP_USERID: userName || "string",
+      installno: 1, // ✅ newly added
+      statecode: profileData?.statecode ? profileData?.statecode : "",
+      station: profileData?.station ? profileData?.station : "",
+      apP_USERID: userName || "",
     };
     try {
       const storedTenant = await AsyncStorage.getItem("tenantName");
@@ -314,13 +360,15 @@ const JoinPurchasePlan = () => {
           },
         }
       );
+      console.log("add member");
     } catch (err) {
       console.log(err);
     }
   };
 
   const theme = new CFThemeBuilder()
-    .setNavigationBarBackgroundColor("#FF4B2B")
+    // .setNavigationBarBackgroundColor("#FF4B2B")
+    .setNavigationBarBackgroundColor("#154D71")
     .setNavigationBarTextColor("#FFFFFF")
     .setButtonBackgroundColor("#FFC107")
     .setButtonTextColor("#FFFFFF")
@@ -328,34 +376,18 @@ const JoinPurchasePlan = () => {
     .setSecondaryTextColor("#757575")
     .build();
 
-  // const handlePaymentCallbacks = useCallback(() => {
-  //   CFPaymentGatewayService.setCallback({
-  //     onVerify(orderID) {
-  //       Alert.alert("Payment Success", `Oreder ID: ${orderID}`);
-  //     },
-  //     onError(error, orderID) {
-  //       Alert.alert(
-  //         "Payment Failed",
-  //         `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
-  //       );
-  //     },
-  //   });
-  //   return () => {
-  //     CFPaymentGatewayService.removeCallback();
-  //   };
-  // }, []);
-
   const handlePaymentCallbacks = useCallback(() => {
     CFPaymentGatewayService.setCallback({
       async onVerify(orderID) {
         try {
+          await paymentStatusVerification(orderID);
+          // router.push(`/explore/success`);
           // Alert.alert("Payment Success", `Order ID: ${orderID}`);
 
           // Alert.alert(
           //   "Success",
           //   "All payment-related data saved successfully."
           // );
-          router.push("/");
         } catch (error) {
           // console.error("Error in payment callback:", error);
           // Alert.alert(
@@ -364,12 +396,13 @@ const JoinPurchasePlan = () => {
           // );
           // const cleanUrl = window.location.origin + "/";
           // window.history.replaceState({}, document.title, cleanUrl);
-          router.push("/");
         }
       },
 
       onError(error, orderID) {
-        // console.error("Payment Error:", error);
+        paymentStatusVerification(orderID);
+        console.error("Payment Error:", error);
+        // router.push(`/explore/failed`);
         // Alert.alert(
         //   "Payment Failed",
         //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
@@ -415,15 +448,18 @@ const JoinPurchasePlan = () => {
 
   useEffect(() => {
     handlePaymentCallbacks();
+    return () => {
+      CFPaymentGatewayService.removeCallback();
+    };
   }, [handlePaymentCallbacks]);
 
   const cashfreePaymentAPI = async (card: number) => {
     const userName = await AsyncStorage.getItem("userName");
     const payBody = {
-      customerName: "Test",
-      email: "test@gmail.com",
-      phone: "9999999999",
-      amountRupees: 1,
+      customerName: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      email: profileData?.EMAILID ? profileData?.EMAILID : "",
+      phone: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      amountRupees: params?.SchemeAmount ? Number(params?.SchemeAmount) : 0,
       userId: userName,
       cardNo: String(card + 1),
       schemeGroup: params?.SchemeGroup,
@@ -444,6 +480,7 @@ const JoinPurchasePlan = () => {
       const data = response.data;
       if (data) {
         startPayment(data);
+        console.log("payment started");
       }
     } catch (err) {
       console.log(err);
@@ -451,14 +488,10 @@ const JoinPurchasePlan = () => {
   };
 
   const handleCreateApi = async () => {
+    setLoading(true);
     try {
       const card = await addCardNo();
-      const receipt = await addRecieptNo();
 
-      await addRecieptMast(card, receipt);
-      await addMemberDetails(card, receipt);
-      await addRecieptPayment(card, receipt);
-      await addMember(card, receipt);
       await cashfreePaymentAPI(card);
     } catch (err) {
       console.log("Error in processing:", err);
@@ -472,7 +505,7 @@ const JoinPurchasePlan = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ImageBackground
-        source={require("../../../assets/images/splash-icon.png")}
+        source={require("../../../assets/images/backgroundImage2.jpg")}
         style={styles.container}
       >
         <ScrollView
@@ -493,186 +526,6 @@ const JoinPurchasePlan = () => {
           >
             if you want to join new purhcase plan proceed
           </Text>
-          {/* <Card
-            style={{ backgroundColor: "#c9c7c4", margin: 20, borderRadius: 3 }}
-          >
-            <View
-              style={
-                {
-                  // alignItems: "center",
-                }
-              }
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  padding: 15,
-                }}
-              >
-                {params?.SchemeGroup}
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", margin: 5, marginLeft: 25 }}>
-              <Text style={{ width: 130, fontSize: 13 }}>Duration</Text>
-              <Text style={{ fontSize: 13 }}>
-                {params?.SchemeDuration} months
-              </Text>
-            </View>
-            <View style={{ flexDirection: "row", margin: 5, marginLeft: 25 }}>
-              <Text style={{ width: 130, fontSize: 13 }}>Monthly Advance</Text>
-              <Text style={{ fontSize: 13 }}>₹{params?.SchemeAmount}</Text>
-            </View>
-            <View style={{ flexDirection: "row", margin: 5, marginLeft: 25 }}>
-              <Text style={{ width: 130, fontSize: 13 }}>Total Payable</Text>
-              <Text style={{ fontSize: 13 }}>₹{params?.SchemeValue}</Text>
-            </View>
-            <View style={{ flexDirection: "row", margin: 5, marginLeft: 25 }}>
-              <Text style={{ width: 130, fontSize: 13 }}>First Advance</Text>
-              <Text style={{ fontSize: 13 }}>₹{params?.SchemeAmount}</Text>
-            </View>
-
-            <Card.Content>
-              <List.Accordion
-                style={{
-                  backgroundColor: "#c9c7c4",
-                  marginVertical: 0,
-                }}
-                title="Terms and Conditions"
-                titleStyle={{ fontSize: 12, color: "black" }}
-                //   left={(props) => <List.Icon {...props} icon="folder" />}
-                expanded={expanded}
-                onPress={handlePress}
-              >
-                <Text
-                  style={{
-                    fontWeight: "bold",
-                    marginHorizontal: 15,
-                    marginBottom: 5,
-                  }}
-                >
-                  Swarnadhara Small Savings Scheme
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 12,
-                    textAlign: "justify",
-                    // marginRight: 15,
-                    marginBottom: 5,
-                  }}
-                >
-                  Moreover, the Swarnadhara Small Savings Scheme is unique like
-                  no other scheme. It offers discounts at the end of the scheme,
-                  and many other benefits. We have listed other benefits below.
-                  We have also answered your basic questions about the
-                  Swarnadhara scheme. Besides, Swarnadhara Small Savings Scheme
-                  is unique like any other scheme. It offers a discount at the
-                  end of the scheme, and many other benefits. We have listed
-                  other benefits below. We have also answered your basic
-                  questions about Swarnadhara Scheme.
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 12,
-                    textAlign: "justify",
-                    marginBottom: 5,
-                  }}
-                >
-                  Join Swarnadhara Scheme today. Let the good times begin.
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    // fontSize: 12,
-                    textAlign: "justify",
-                    fontWeight: "bold",
-                    marginBottom: 5,
-                  }}
-                >
-                  Benefits
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 12,
-                    textAlign: "justify",
-                    marginBottom: 5,
-                  }}
-                >
-                  Discount on the purchase price of one month's installment of
-                  the small savings scheme
-                </Text>
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 12,
-                    textAlign: "justify",
-                    marginBottom: 5,
-                    // marginHorizontal: 15,
-                  }}
-                >
-                  You can continue with the scheme even if you fail to pay the
-                  installment. However, the scheme's maturity period will be
-                  delayed accordingly.
-                </Text>
-              </List.Accordion>
-              <View
-                style={{
-                  flexDirection: "row",
-                  //   marginHorizontal: 25,
-                  marginTop: 3,
-                  alignItems: "center",
-                }}
-              >
-                <RadioButton
-                  value="first"
-                  // status={checked === "first" ? "checked" : "unchecked"}
-                  // onPress={() => setChecked("first")}
-                />
-                <Text style={{ fontWeight: "bold", fontSize: 12 }}>
-                  I agree with Terms and Conditions
-                </Text>
-              </View>
-
-              <Pressable
-                style={{
-                  backgroundColor: "#154D71",
-                  //   alignSelf: "center",
-                  paddingHorizontal: 10,
-                  paddingVertical: 8,
-                  //   borderRadius: 6,
-                  width: 250,
-                  marginLeft: 25,
-                  marginTop: 10,
-                }}
-                onPress={() => {
-                  // addCardNo();
-                  // addRecieptNo();
-                  // setTimeout(() => {
-                  //   addRecieptMast();
-                  //   addMemberDetails();
-                  //   addRecieptPayment();
-                  // }, 5000);
-                  handleCreateApi();
-                }}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "#fff",
-                    fontWeight: "bold",
-
-                    // width: 150,
-                  }}
-                >
-                  Pay
-                </Text>
-              </Pressable>
-            </Card.Content>
-          </Card> */}
           <Card style={styles.schemeCard}>
             <View style={styles.schemeHeader}>
               <Text style={styles.schemeTitle}>{params?.SchemeGroup}</Text>
@@ -703,103 +556,25 @@ const JoinPurchasePlan = () => {
                 </Text>
               </Text>
             </View>
-
-            <List.Accordion
-              style={styles.accordion}
-              title="Terms and Conditions ▾"
-              titleStyle={styles.accordionTitle}
-              expanded={expanded}
-              onPress={handlePress}
+            <Pressable
+              style={styles.payButton}
+              onPress={async () => {
+                setLoading(true);
+                const card: any = await addCardNo();
+                await cashfreePaymentAPI(card);
+              }}
+              disabled={loading}
             >
-              <Text
-                style={{
-                  fontWeight: "bold",
-                  marginHorizontal: 15,
-                  marginBottom: 5,
-                }}
-              >
-                Swarnadhara Small Savings Scheme
-              </Text>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 12,
-                  textAlign: "justify",
-                  // marginRight: 15,
-                  marginBottom: 5,
-                }}
-              >
-                Moreover, the Swarnadhara Small Savings Scheme is unique like no
-                other scheme. It offers discounts at the end of the scheme, and
-                many other benefits. We have listed other benefits below. We
-                have also answered your basic questions about the Swarnadhara
-                scheme. Besides, Swarnadhara Small Savings Scheme is unique like
-                any other scheme. It offers a discount at the end of the scheme,
-                and many other benefits. We have listed other benefits below. We
-                have also answered your basic questions about Swarnadhara
-                Scheme.
-              </Text>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 12,
-                  textAlign: "justify",
-                  marginBottom: 5,
-                }}
-              >
-                Join Swarnadhara Scheme today. Let the good times begin.
-              </Text>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  // fontSize: 12,
-                  textAlign: "justify",
-                  fontWeight: "bold",
-                  marginBottom: 5,
-                }}
-              >
-                Benefits
-              </Text>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 12,
-                  textAlign: "justify",
-                  marginBottom: 5,
-                }}
-              >
-                Discount on the purchase price of one month's installment of the
-                small savings scheme
-              </Text>
-              <Text
-                style={{
-                  marginLeft: 15,
-                  fontSize: 12,
-                  textAlign: "justify",
-                  marginBottom: 5,
-                  // marginHorizontal: 15,
-                }}
-              >
-                You can continue with the scheme even if you fail to pay the
-                installment. However, the scheme's maturity period will be
-                delayed accordingly.
-              </Text>
-            </List.Accordion>
-
-            <View style={styles.agreeRow}>
-              <RadioButton value="first" />
-              <Text style={styles.agreeText}>
-                I agree with Terms and Conditions
-              </Text>
-            </View>
-
-            <Pressable style={styles.payButton} onPress={handleCreateApi}>
-              <Text style={styles.payText}>Pay</Text>
+              {loading ? (
+                <ActivityIndicator animating={true} color={"#fff"} />
+              ) : (
+                <Text style={styles.payText}>Pay</Text>
+              )}
             </Pressable>
           </Card>
         </ScrollView>
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© Timesera 2025 ( V-1.0.5 )</Text>
+          <Text style={styles.footerText}>© Timesera 2025 ( V-{version})</Text>
           <Image
             source={require("../../../assets/images/icon.png")} // replace with your logo
             style={styles.footerLogo}

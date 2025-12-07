@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 export default function ExploreLayout() {
   return (
     <Stack screenOptions={{ headerShown: true }}>
-      <Stack.Screen name="details-now" options={{ title: "Details" }} />
+      {/* <Stack.Screen name="details-now" options={{ title: "Details" }} /> */}
       <Stack.Screen
         name="new-plan"
         // component={Details} // your component
