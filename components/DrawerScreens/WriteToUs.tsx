@@ -1,6 +1,10 @@
+import { CREATE_JEWEL } from "@/api";
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -10,14 +14,116 @@ import {
 import { Snackbar } from "react-native-paper";
 
 export default function WriteToUs() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [profileData, setProfileData] = useState<any>();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [visible, setVisible] = useState(false);
+
+  const getProfile = async () => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    const userName = await AsyncStorage.getItem("userName");
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/Tenant/GetSchemeUserDetails?userName=${userName}
+`,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        },
+      );
+      const data: any = await response?.data[0];
+      setProfileData(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const validateForm = () => {
+    let valid = true;
+    let newErrors = {
+      name: "",
+      email: "",
+      message: "",
+    };
+
+    if (!form.name.trim()) {
+      newErrors.name = "Name is required";
+      valid = false;
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Enter valid email";
+      valid = false;
+    }
+
+    if (!form.message.trim()) {
+      newErrors.message = "Message is required";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const addFeedBack = async () => {
+    if (!validateForm()) return;
+
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+
+    const payload = {
+      usermobileno: profileData?.MOBILENO || "",
+      emailid: form.email,
+      contactsms: form.message,
+      username: form.name,
+      otherS2: "",
+      cdate: 0,
+      uid: 0,
+      loginuser: profileData?.FULLNAME || "",
+      loginmobileno: profileData?.MOBILENO || "",
+    };
+
+    try {
+      await axios.post(
+        `${CREATE_JEWEL}/api/Scheme/SchemeFeedBackInsert`,
+        payload,
+        {
+          headers: { tenantName: storedTenant },
+        },
+      );
+
+      // ✅ clear form only after success
+      setForm({ name: "", email: "", message: "" });
+      setVisible(true);
+    } catch (error) {
+      Alert.alert("Error", "Failed to send message. Try again.");
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, []);
 
   const handleSubmit = () => {
     setVisible(true);
     // Add your backend API logic here
+  };
+
+  const handleChange = (key: string, value: string) => {
+    setForm({ ...form, [key]: value });
+    setErrors({ ...errors, [key]: "" }); // clear error on change
   };
 
   return (
@@ -50,8 +156,8 @@ export default function WriteToUs() {
         <TextInput
           placeholder="Enter your full name"
           placeholderTextColor="#777"
-          value={name}
-          onChangeText={setName}
+          value={form.name}
+          onChangeText={(value) => handleChange("name", value)}
           style={{
             height: 45,
             borderWidth: 1,
@@ -62,6 +168,9 @@ export default function WriteToUs() {
             backgroundColor: "#fff",
           }}
         />
+        {errors.name ? (
+          <Text style={{ color: "red", marginBottom: 8 }}>{errors.name}</Text>
+        ) : null}
 
         {/* Email */}
         <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 6 }}>
@@ -71,8 +180,8 @@ export default function WriteToUs() {
           placeholder="Enter your email"
           keyboardType="email-address"
           placeholderTextColor="#777"
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={(value) => handleChange("email", value)}
           style={{
             height: 45,
             borderWidth: 1,
@@ -83,6 +192,9 @@ export default function WriteToUs() {
             backgroundColor: "#fff",
           }}
         />
+        {errors.email ? (
+          <Text style={{ color: "red", marginBottom: 8 }}>{errors.email}</Text>
+        ) : null}
 
         {/* Message */}
         <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 6 }}>
@@ -93,8 +205,8 @@ export default function WriteToUs() {
           placeholderTextColor="#777"
           multiline
           numberOfLines={5}
-          value={message}
-          onChangeText={setMessage}
+          value={form.message}
+          onChangeText={(value) => handleChange("message", value)}
           style={{
             borderWidth: 1,
             borderColor: "#154D71",
@@ -106,10 +218,15 @@ export default function WriteToUs() {
             backgroundColor: "#fff",
           }}
         />
+        {errors.message ? (
+          <Text style={{ color: "red", marginBottom: 8 }}>
+            {errors.message}
+          </Text>
+        ) : null}
 
         {/* Submit Button */}
         <TouchableOpacity
-          onPress={handleSubmit}
+          onPress={addFeedBack}
           style={{
             backgroundColor: "#154D71",
             paddingVertical: 12,
@@ -138,13 +255,16 @@ export default function WriteToUs() {
           backgroundColor: "#00C853", // green background
           borderRadius: 10,
         }}
+        // wrapperStyle={{
+        //   position: "absolute",
+        //   alignSelf: "center", // ⬅️ Centers Snackbar horizontally
+        //   top: 10,
+        //   alignContent: "center",
+        //   alignItems: "center",
+        //   justifyContent: "center",
+        // }}
         wrapperStyle={{
-          position: "absolute",
-          alignSelf: "center", // ⬅️ Centers Snackbar horizontally
-          top: 10,
-          alignContent: "center",
-          alignItems: "center",
-          justifyContent: "center",
+          top: 50,
         }}
       >
         <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>

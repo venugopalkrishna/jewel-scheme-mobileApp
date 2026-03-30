@@ -2,7 +2,7 @@ import { CREATE_JEWEL } from "@/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
@@ -36,14 +36,14 @@ const JoinPurchasePlan = () => {
   const [profileData, setProfileData] = useState<any>();
   const version = Constants?.expoConfig?.version;
   const [loading, setLoading] = useState(false);
-  console.log(params, "params");
+  const isVerifyingRef = useRef(false);
 
   const addCardNo = async () => {
     const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=SCHEME_MEMBER&column=CNO`,
-        { headers: { tenantName: storedTenant } }
+        { headers: { tenantName: storedTenant } },
       );
       const data: number = (await response?.data[0]?.Column1) || 0;
       setCardNo(data);
@@ -59,7 +59,7 @@ const JoinPurchasePlan = () => {
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
-        { headers: { tenantName: storedTenant } }
+        { headers: { tenantName: storedTenant } },
       );
       const data: number = (await response?.data[0]?.Column1) || 0;
       setReceiptNo(data);
@@ -81,7 +81,7 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
       const data: any = await response?.data[0];
       setProfileData(data);
@@ -155,9 +155,8 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add receipt mast");
     } catch (err) {
       console.log(err);
     }
@@ -195,9 +194,8 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add receipt payment");
     } catch (err) {
       console.log(err);
     }
@@ -238,39 +236,12 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add Member details");
     } catch (err) {
       console.log(err);
     }
   };
-
-  const paymentStatusVerification = async (orderId: any) => {
-    setLoading(false);
-    try {
-      const response = await axios.get(
-        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`
-      );
-      const data = await response?.data;
-      if (data?.status === "PAID") {
-        const card = await addCardNo();
-        const receipt = await addRecieptNo();
-
-        await addMember(card, receipt);
-        await addRecieptMast(card, receipt);
-        await addRecieptPayment(card, receipt);
-        await addMemberDetails(card, receipt);
-
-        router.push(`/explore/success`);
-      } else {
-        router.push(`/explore/failed`);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  console.log(profileData, "profiledata");
 
   const addMember = async (card: number, receipt: number) => {
     const userName = await AsyncStorage.getItem("userName");
@@ -358,11 +329,73 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add member");
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  // const paymentStatusVerification = async (orderId: any) => {
+  //   setLoading(false);
+  //   try {
+  //     const response = await axios.get(
+  //       `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`,
+  //     );
+  //     const data = await response?.data;
+  //     if (data?.status === "PAID") {
+  //       const card = await addCardNo();
+  //       const receipt = await addRecieptNo();
+
+  //       await addMember(card, receipt);
+  //       await addRecieptMast(card, receipt);
+  //       await addRecieptPayment(card, receipt);
+  //       await addMemberDetails(card, receipt);
+
+  //       router.push(`/explore/success`);
+  //     } else {
+  //       router.push(`/explore/failed`);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+  const paymentStatusVerification = async (orderId: string) => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    try {
+      const response = await axios.get(
+        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        },
+      );
+
+      const data = response?.data;
+
+      if (data?.status === "PAID") {
+        const card = await addCardNo();
+        const receipt = await addRecieptNo();
+
+        await Promise.all([
+          addMember(card, receipt),
+          addRecieptMast(card, receipt),
+          addRecieptPayment(card, receipt),
+          addMemberDetails(card, receipt),
+        ]);
+
+        router.replace("/explore/success");
+      } else {
+        router.replace("/explore/failed");
+      }
+    } catch (error) {
+      console.error("Payment verification failed:", error);
+      Alert.alert("Payment verification failed");
+      // router.replace("/explore/failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -396,16 +429,19 @@ const JoinPurchasePlan = () => {
           // );
           // const cleanUrl = window.location.origin + "/";
           // window.history.replaceState({}, document.title, cleanUrl);
+          // Alert.alert(
+          //   "Payment Failed",
+          //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`,
+          // );
         }
       },
 
       onError(error, orderID) {
         paymentStatusVerification(orderID);
-        console.error("Payment Error:", error);
         // router.push(`/explore/failed`);
         // Alert.alert(
         //   "Payment Failed",
-        //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
+        //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`,
         // );
       },
     });
@@ -416,12 +452,34 @@ const JoinPurchasePlan = () => {
     };
   }, []);
 
+  // const handlePaymentCallbacks = useCallback(() => {
+  //   CFPaymentGatewayService.setCallback({
+  //     onVerify: async (orderID: string) => {
+  //       console.log("Cashfree onVerify:", orderID);
+  //       await paymentStatusVerification(orderID);
+  //     },
+
+  //     onError: (error: any, orderID?: string) => {
+  //       console.error("Cashfree payment error:", error, orderID);
+
+  //       setLoading(false);
+
+  //       // ❌ DO NOT verify payment on error
+  //       router.replace("/explore/failed");
+  //     },
+  //   });
+
+  //   return () => {
+  //     CFPaymentGatewayService.removeCallback();
+  //   };
+  // }, []);
+
   const startPayment = async (data: any) => {
     try {
       const session = new CFSession(
         data?.paymentSessionId,
         data?.orderId,
-        CFEnvironment.SANDBOX
+        CFEnvironment.SANDBOX,
       );
 
       const components = new CFPaymentComponentBuilder()
@@ -437,7 +495,7 @@ const JoinPurchasePlan = () => {
       const dropCheckoutPayment = new CFDropCheckoutPayment(
         session,
         components,
-        theme
+        theme,
       );
       CFPaymentGatewayService.doPayment(dropCheckoutPayment);
     } catch (error: any) {
@@ -446,11 +504,16 @@ const JoinPurchasePlan = () => {
     }
   };
 
+  // useEffect(() => {
+  //   handlePaymentCallbacks();
+  //   return () => {
+  //     CFPaymentGatewayService.removeCallback();
+  //   };
+  // }, [handlePaymentCallbacks]);
+
   useEffect(() => {
-    handlePaymentCallbacks();
-    return () => {
-      CFPaymentGatewayService.removeCallback();
-    };
+    const cleanup = handlePaymentCallbacks();
+    return cleanup;
   }, [handlePaymentCallbacks]);
 
   const cashfreePaymentAPI = async (card: number) => {
@@ -475,26 +538,36 @@ const JoinPurchasePlan = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
       const data = response.data;
       if (data) {
         startPayment(data);
-        console.log("payment started");
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleCreateApi = async () => {
-    setLoading(true);
-    try {
-      const card = await addCardNo();
+  // const handleCreateApi = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const card = await addCardNo();
 
+  //     await cashfreePaymentAPI(card);
+  //   } catch (err) {
+  //     console.log("Error in processing:", err);
+  //   }
+  // };
+
+  const handleCreateApi = async () => {
+    try {
+      setLoading(true);
+      const card = await addCardNo();
       await cashfreePaymentAPI(card);
-    } catch (err) {
-      console.log("Error in processing:", err);
+    } catch (error) {
+      console.error("Payment initiation failed:", error);
+      setLoading(false);
     }
   };
 
@@ -556,7 +629,7 @@ const JoinPurchasePlan = () => {
                 </Text>
               </Text>
             </View>
-            <Pressable
+            {/* <Pressable
               style={styles.payButton}
               onPress={async () => {
                 setLoading(true);
@@ -567,6 +640,17 @@ const JoinPurchasePlan = () => {
             >
               {loading ? (
                 <ActivityIndicator animating={true} color={"#fff"} />
+              ) : (
+                <Text style={styles.payText}>Pay</Text>
+              )}
+            </Pressable> */}
+            <Pressable
+              style={styles.payButton}
+              onPress={handleCreateApi}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator animating color="#fff" />
               ) : (
                 <Text style={styles.payText}>Pay</Text>
               )}

@@ -46,6 +46,7 @@ const PayEma = () => {
   const [schemeData, setSchemeData] = useState<any>();
   const [expandedCard, setExpandedCard] = useState(null);
   const [loadingIndex, setLoadingIndex] = useState(Number);
+  const [loadingKey, setLoadingKey] = useState<string | null>(null);
   const cardItemRef = useRef(null);
   const payInstallmentRef = useRef(null);
 
@@ -54,11 +55,10 @@ const PayEma = () => {
     try {
       const response = await axios.get(
         `${CREATE_JEWEL}/api/Scheme/GetSchemeMaxNumberInTable?tableName=RECEIPT_MAST&column=RECNO`,
-        { headers: { tenantName: storedTenant } }
+        { headers: { tenantName: storedTenant } },
       );
       const data: number = response?.data[0]?.Column1 || 0;
       setReceiptNo(data);
-      console.log("add receipt");
 
       return data;
     } catch (err) {
@@ -78,7 +78,7 @@ const PayEma = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
       const data: any = await response?.data[0];
       setProfileData(data);
@@ -86,10 +86,11 @@ const PayEma = () => {
       console.log(err);
     }
   };
+
   const addRecieptMast = async (
     card: any,
     receipt: number,
-    installment: any
+    installment: any,
   ) => {
     const userName = await AsyncStorage.getItem("userName");
     const payload = {
@@ -152,9 +153,8 @@ const PayEma = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add receipt mast");
     } catch (err) {
       console.log(err);
     }
@@ -163,7 +163,7 @@ const PayEma = () => {
   const addRecieptPayment = async (
     card: any,
     receipt: number,
-    installment: any
+    installment: any,
   ) => {
     const userName = await AsyncStorage.getItem("userName");
     const tablePayloads = [
@@ -197,9 +197,8 @@ const PayEma = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("receipt payment");
     } catch (err) {
       console.log(err);
     }
@@ -207,7 +206,7 @@ const PayEma = () => {
   const addMemberDetails = async (
     card: any,
     receipt: number,
-    installment: any
+    installment: any,
   ) => {
     const userName = await AsyncStorage.getItem("userName");
     const memberCardPayload = {
@@ -226,14 +225,12 @@ const PayEma = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("member details");
     } catch (err) {
       console.log(err);
     }
   };
-  console.log(dayjs(new Date()).format("MM/DD/YYYY"), "date");
 
   const addMember = async (card: any, receipt: number, installment: any) => {
     const userName = await AsyncStorage.getItem("userName");
@@ -317,16 +314,15 @@ const PayEma = () => {
           headers: {
             tenantName: storedTenant,
           },
-        }
+        },
       );
-      console.log("add member");
     } catch (err) {
       console.log(err);
     }
   };
 
   const theme = new CFThemeBuilder()
-    .setNavigationBarBackgroundColor("#FF4B2B")
+    .setNavigationBarBackgroundColor("#154D71")
     .setNavigationBarTextColor("#FFFFFF")
     .setButtonBackgroundColor("#FFC107")
     .setButtonTextColor("#FFFFFF")
@@ -337,11 +333,17 @@ const PayEma = () => {
   const paymentStatusVerification = async (
     orderId: any,
     cardItem: any,
-    payInstallment: any
+    payInstallment: any,
   ) => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
     try {
       const response = await axios.get(
-        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`
+        `${CREATE_JEWEL}/api/PaymentProcess/VerifyPayment/${orderId}`,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        },
       );
       const data = await response?.data;
       if (data?.status === "PAID") {
@@ -351,73 +353,137 @@ const PayEma = () => {
         await addRecieptMast(cardItem, receipt, payInstallment);
         await addMemberDetails(cardItem, receipt, payInstallment);
         await addRecieptPayment(cardItem, receipt, payInstallment);
-        router.push({
-          pathname: `/explore/success`,
-        });
+        router.push(`/explore/success`);
       } else {
         router.push(`/explore/failed`);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoadingKey(null);
+    }
+  };
+
+  // const handlePaymentCallbacks = useCallback(() => {
+  //   CFPaymentGatewayService.setCallback({
+  //     async onVerify(orderID) {
+  //       try {
+  //         await paymentStatusVerification(
+  //           orderID,
+  //           cardItemRef.current,
+  //           payInstallmentRef.current,
+  //         );
+
+  //         // Alert.alert("Payment Success", `Order ID: ${orderID}`);
+  //         // Alert.alert(
+  //         //   "Success",
+  //         //   "All payment-related data saved successfully."
+  //         // );
+  //       } catch (error) {
+  //         // router.push(`/explore/failed`);
+  //         // console.error("Error in payment callback:", error);
+  //         // Alert.alert(
+  //         //   "Error",
+  //         //   "Something went wrong while saving payment data."
+  //         // );
+  //         // const cleanUrl = window.location.origin + "/";
+  //         // window.history.replaceState({}, document.title, cleanUrl);
+  //       }
+  //     },
+
+  //     onError(error, orderID) {
+  //       paymentStatusVerification(
+  //         orderID,
+  //         cardItemRef.current,
+  //         payInstallmentRef.current,
+  //       );
+
+  //       // setLoading(false);
+  //       // router.push(`/explore/failed`);
+  //       // console.error("Payment Error:", error);
+  //       // Alert.alert(
+  //       //   "Payment Failed",
+  //       //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
+  //       // );
+  //     },
+  //   });
+
+  //   // cleanup function on unmount
+  //   return () => {
+  //     CFPaymentGatewayService.removeCallback();
+  //   };
+  // }, []);
+
+  const handlePaymentCallbacks = useCallback(() => {
+    CFPaymentGatewayService.setCallback({
+      async onVerify(orderID) {
+        await paymentStatusVerification(
+          orderID,
+          cardItemRef.current,
+          payInstallmentRef.current,
+        );
+      },
+
+      async onError(error, orderID) {
+        await paymentStatusVerification(
+          orderID,
+          cardItemRef.current,
+          payInstallmentRef.current,
+        );
+      },
+    });
+
+    return () => CFPaymentGatewayService.removeCallback();
+  }, []);
+
+  useEffect(() => {
+    const cleanup = handlePaymentCallbacks();
+    return cleanup;
+  }, [handlePaymentCallbacks]);
+
+  const cashfreePaymentAPI = async (card: any, installment: any) => {
+    const storedTenant = await AsyncStorage.getItem("tenantName");
+    const userName = await AsyncStorage.getItem("userName");
+    const payload = {
+      customerName: profileData?.FULLNAME ? profileData?.FULLNAME : "",
+      email: profileData?.EMAILID ? profileData?.EMAILID : "",
+      phone: profileData?.MOBILENO ? profileData?.MOBILENO : "",
+      amountRupees: card?.SchemeAmount ? Number(card?.SchemeAmount) : 0,
+      userId: userName,
+      cardNo: String(card?.CardNo),
+      schemeGroup: card?.SchemeGroup,
+      schemeName: card?.SchemeName,
+      installmentno: String(installment?.sno),
+    };
+    try {
+      const response = await axios.post(
+        `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
+        payload,
+        {
+          headers: {
+            tenantName: storedTenant,
+          },
+        },
+      );
+      const data = response.data;
+      if (data) {
+        // startPayment(data);
+        startPayment({
+          orderId: data.orderId,
+          paymentSessionId: data.paymentSessionId,
+        });
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handlePaymentCallbacks = useCallback(() => {
-    CFPaymentGatewayService.setCallback({
-      async onVerify(orderID) {
-        try {
-          await paymentStatusVerification(
-            orderID,
-            cardItemRef.current,
-            payInstallmentRef.current
-          );
-
-          // Alert.alert("Payment Success", `Order ID: ${orderID}`);
-          // Alert.alert(
-          //   "Success",
-          //   "All payment-related data saved successfully."
-          // );
-        } catch (error) {
-          router.push(`/explore/failed`);
-          // console.error("Error in payment callback:", error);
-          // Alert.alert(
-          //   "Error",
-          //   "Something went wrong while saving payment data."
-          // );
-          // const cleanUrl = window.location.origin + "/";
-          // window.history.replaceState({}, document.title, cleanUrl);
-        }
-      },
-
-      onError(error, orderID) {
-        paymentStatusVerification(
-          orderID,
-          cardItemRef.current,
-          payInstallmentRef.current
-        );
-
-        setLoading(false);
-        router.push(`/explore/failed`);
-        // console.error("Payment Error:", error);
-        // Alert.alert(
-        //   "Payment Failed",
-        //   `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`
-        // );
-      },
-    });
-
-    // cleanup function on unmount
-    return () => {
-      CFPaymentGatewayService.removeCallback();
-    };
-  }, []);
-
   const startPayment = async (data: any) => {
     try {
       const session = new CFSession(
         data?.paymentSessionId,
         data?.orderId,
-        CFEnvironment.SANDBOX
+        CFEnvironment.SANDBOX,
       );
 
       const components = new CFPaymentComponentBuilder()
@@ -433,7 +499,7 @@ const PayEma = () => {
       const dropCheckoutPayment = new CFDropCheckoutPayment(
         session,
         components,
-        theme
+        theme,
       );
       CFPaymentGatewayService.doPayment(dropCheckoutPayment);
     } catch (error: any) {
@@ -442,48 +508,8 @@ const PayEma = () => {
     }
   };
 
-  useEffect(() => {
-    handlePaymentCallbacks();
-  }, [handlePaymentCallbacks]);
-
-  const cashfreePaymentAPI = async (card: any, installment: any) => {
-    const userName = await AsyncStorage.getItem("userName");
-    const payBody = {
-      customerName: profileData?.FULLNAME ? profileData?.FULLNAME : "",
-      email: profileData?.EMAILID ? profileData?.EMAILID : "",
-      phone: profileData?.MOBILENO ? profileData?.MOBILENO : "",
-      amountRupees: card?.SchemeAmount,
-      userId: userName,
-      cardNo: String(card?.CardNo),
-      schemeGroup: card?.SchemeGroup,
-      schemeName: card?.SchemeName,
-      installmentno: installment?.sno,
-    };
-    try {
-      const storedTenant = await AsyncStorage.getItem("tenantName");
-      const response = await axios.post(
-        `${CREATE_JEWEL}/api/PaymentProcess/PaymentProcess`,
-        payBody,
-        {
-          headers: {
-            tenantName: storedTenant,
-          },
-        }
-      );
-      const data = response.data;
-      if (data) {
-        startPayment(data);
-        console.log("start payment");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const handleCreateApi = async (card: any, installment: any) => {
     try {
-      console.log("create api");
-
       // const card = await addCardNo();
     } catch (err) {
       console.log("Error in processing:", err);
@@ -502,7 +528,7 @@ const PayEma = () => {
       if (storedTenant) {
         const res = await axios.get(
           `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhere?tableName=MEMBER_CARD_DET&where=APP_USERID='${userName}' AND CARDNO='${card}'&order=sno `,
-          { headers: { tenantName: storedTenant } }
+          { headers: { tenantName: storedTenant } },
         );
 
         const data = res.data || [];
@@ -541,7 +567,7 @@ const PayEma = () => {
       if (storedTenant) {
         const res = await axios.get(
           `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
-          { headers: { tenantName: storedTenant } }
+          { headers: { tenantName: storedTenant } },
         );
         const memberData = res.data;
         setSchemeData(memberData);
@@ -579,7 +605,7 @@ const PayEma = () => {
     due.setHours(0, 0, 0, 0);
 
     const diffDays = Math.floor(
-      (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (diffDays > 0) {
@@ -614,7 +640,6 @@ const PayEma = () => {
                   onPress={() => {
                     toggleExpand(index);
                     schemeMemberDet(item?.CardNo);
-                    console.log(item?.CardNo, "card no");
                   }}
                 >
                   <Card style={styles.card}>
@@ -682,7 +707,7 @@ const PayEma = () => {
                                       <Text style={styles.colon}>:</Text>
                                       <Text style={styles.value}>
                                         {dayjs(
-                                          dataitem?.SCHEMEJOINDATE
+                                          dataitem?.SCHEMEJOINDATE,
                                         )?.format("DD/MM/YYYY")}
                                       </Text>
                                     </View>
@@ -692,7 +717,7 @@ const PayEma = () => {
                                       <Text style={styles.colon}>:</Text>
                                       <Text style={styles.value}>
                                         {dayjs(dataitem?.MONTH).format(
-                                          "DD/MM/YYYY"
+                                          "DD/MM/YYYY",
                                         )}
                                       </Text>
                                     </View>
@@ -722,7 +747,7 @@ const PayEma = () => {
                                       <Text style={styles.colon}>:</Text>
                                       <Text style={styles.value}>
                                         {dayjs(
-                                          dataitem?.SCHEMEJOINDATE
+                                          dataitem?.SCHEMEJOINDATE,
                                         )?.format("DD/MM/YYYY")}
                                       </Text>
                                     </View>
@@ -732,7 +757,7 @@ const PayEma = () => {
                                       <Text style={styles.colon}>:</Text>
                                       <Text style={styles.value}>
                                         {dayjs(dataitem?.MONTH).format(
-                                          "DD/MM/YYYY"
+                                          "DD/MM/YYYY",
                                         )}
                                       </Text>
                                     </View>
@@ -777,31 +802,62 @@ const PayEma = () => {
                                     {/* PAY EMI BUTTON only if due or overdue */}
                                     {(emiStatus.type === "today" ||
                                       emiStatus.type === "overdue") && (
+                                      // <Pressable
+                                      //   disabled={loading}
+                                      //   style={styles.payButton}
+                                      //   onPress={() => {
+                                      //     setLoading(true);
+                                      //     setCardItem(item);
+                                      //     setInstallment(dataitem);
+                                      //     cardItemRef.current = item;
+                                      //     payInstallmentRef.current = dataitem;
+                                      //     setLoadingIndex(dataindex);
+                                      //     console.log(dataitem, "data item");
+                                      //     console.log(item, "item");
+                                      //     cashfreePaymentAPI(item, dataitem);
+
+                                      //     // handleCreateApi(item, dataitem);
+                                      //     // if (result.success) {
+                                      //     //   handlePaymentCallbacks(); // call ONLY after API success
+                                      //     // }
+                                      //   }}
+                                      // >
+                                      //   {loadingIndex === dataindex ? (
+                                      //     <ActivityIndicator
+                                      //       animating={true}
+                                      //       color={"#fff"}
+                                      //     />
+                                      //   ) : (
+                                      //     <Text style={styles.payButtonText}>
+                                      //       Pay EMI
+                                      //     </Text>
+                                      //   )}
+                                      // </Pressable>
                                       <Pressable
-                                        disabled={loading}
+                                        disabled={loadingKey !== null}
                                         style={styles.payButton}
-                                        onPress={() => {
-                                          // setLoading(true);
-                                          setCardItem(item);
-                                          setInstallment(dataitem);
+                                        onPress={async () => {
+                                          const emiKey = `${item.CardNo}-${dataitem.sno}`;
+
+                                          setLoadingKey(emiKey);
+
+                                          // ✅ ALWAYS set refs first
                                           cardItemRef.current = item;
                                           payInstallmentRef.current = dataitem;
-                                          // setLoadingIndex(dataindex);
-                                          console.log(dataitem, "data item");
-                                          console.log(item, "item");
-                                          cashfreePaymentAPI(item, dataitem);
 
-                                          // handleCreateApi(item, dataitem);
-                                          // if (result.success) {
-                                          //   handlePaymentCallbacks(); // call ONLY after API success
-                                          // }
+                                          try {
+                                            await cashfreePaymentAPI(
+                                              item,
+                                              dataitem,
+                                            );
+                                          } catch (e) {
+                                            setLoadingKey(null);
+                                          }
                                         }}
                                       >
-                                        {loadingIndex === dataindex ? (
-                                          <ActivityIndicator
-                                            animating={true}
-                                            color={"#fff"}
-                                          />
+                                        {loadingKey ===
+                                        `${item.CardNo}-${dataitem.sno}` ? (
+                                          <ActivityIndicator color="#fff" />
                                         ) : (
                                           <Text style={styles.payButtonText}>
                                             Pay EMI
@@ -820,7 +876,7 @@ const PayEma = () => {
                                 )}
                               </View>
                             );
-                          }
+                          },
                         )}
                       </View>
                     )}

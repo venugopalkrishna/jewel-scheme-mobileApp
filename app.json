@@ -13,23 +13,16 @@
     },
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "com.timesera.timeserajewelscheme",
+      "supportsTablet": true,
       "infoPlist": {
-        "CFBundleURLTypes": [
-          {
-            "CFBundleURLSchemes": ["timeserajewelscheme"]
-          }
-        ],
         "LSApplicationQueriesSchemes": [
           "phonepe",
           "tez",
           "paytmmp",
           "bhim",
-          "amazonpay",
           "credpay"
-        ],
-        "ITSAppUsesNonExemptEncryption": false
+        ]
       }
     },
     "android": {
@@ -62,8 +55,6 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-firebase/app",
-      ["expo-notifications", {}],
       [
         "expo-splash-screen",
         {

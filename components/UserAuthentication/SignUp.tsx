@@ -66,7 +66,7 @@ const SignUp = () => {
 
       // Call your backend API endpoint
       const res = await axios.get(
-        `${CREATE_JEWEL}/api/Tenant/CheckSchemeUserExits?userName=${form?.lastName}`
+        `${CREATE_JEWEL}/api/Tenant/CheckSchemeUserExits?userName=${form?.lastName}`,
       );
       setUserCheck(res?.data);
     } catch (error) {
@@ -151,7 +151,7 @@ const SignUp = () => {
           headers: {
             tenantName: "gWWcFY+vylo8+VGsn/VemFh5B9b64KFKUjwRZGL3e/E=",
           },
-        }
+        },
       );
       const data = await response?.data;
       setCheckMobile(data);
@@ -169,7 +169,7 @@ const SignUp = () => {
           headers: {
             tenantName: "gWWcFY+vylo8+VGsn/VemFh5B9b64KFKUjwRZGL3e/E=",
           },
-        }
+        },
       );
       const data = response?.data;
       setCheckUserName(data);
@@ -195,10 +195,6 @@ const SignUp = () => {
   //     console.log(err);
   //   }
   // };
-
-  console.log(checkEmail, "email");
-  console.log(checkUserName, "username");
-  console.log(checkMobile, "mobile");
 
   const signUp = async () => {
     if (!validateForm()) return;
@@ -234,7 +230,7 @@ const SignUp = () => {
             "Content-Type": "application/json",
             Accept: "*/*",
           },
-        }
+        },
       );
 
       if (response?.data) {

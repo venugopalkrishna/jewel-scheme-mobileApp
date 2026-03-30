@@ -28,7 +28,6 @@
 //             { headers: { tenantName: storedTenant } }
 //           );
 //           setSchemeMemberData(res.data || []);
-//           console.log(res.data);
 //         }
 //       } catch (err) {
 //         console.log("Error fetching data:", err);
@@ -287,7 +286,7 @@ const MyPlans = () => {
 
   const uniqueCategories = [
     ...new Map(
-      schemeMemberData.map((item: any) => [item?.SchemeGroup, item])
+      schemeMemberData.map((item: any) => [item?.SchemeGroup, item]),
     ).values(),
   ];
 
@@ -299,7 +298,7 @@ const MyPlans = () => {
         if (storedTenant) {
           const res = await axios.get(
             `${CREATE_JEWEL}/api/Master/GetDataFromGivenTableNameWithWhereandOrder?tableName=SCHEME_MEMBER&where=APP_USERID='${userName}'&order=CNO`,
-            { headers: { tenantName: storedTenant } }
+            { headers: { tenantName: storedTenant } },
           );
           setSchemeMemberData(res.data || []);
         }
